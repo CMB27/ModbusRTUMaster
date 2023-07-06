@@ -67,226 +67,167 @@ void ModbusRTUMaster::begin(unsigned long baud, uint8_t config) {
 
 
 
-boolean ModbusRTUMaster::readCoils(uint8_t id, unsigned int startAddress, boolean *buf, unsigned int quantity) {
-  if (id ==0 or id >= 248 or quantity == 0 or quantity > 2000) return false;
+bool ModbusRTUMaster::readCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity) {
+  const uint8_t functionCode = 1;
+  uint8_t byteCount = _div8RndUp(quantity);
+  if (id < 1 || id > 247 || !buf || quantity == 0 || quantity > 2000) return false;
   _buf[0] = id;
-  _buf[1] = 0x01;
-  _buf[2] = highuint8_t(startAddress);
-  _buf[3] = lowuint8_t(startAddress);
-  _buf[4] = highuint8_t(quantity);
-  _buf[5] = lowuint8_t(quantity);
-  _transmit(6);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      uint8_t uint8_tCount = _div8RndUp(quantity);
-      if (i = (3 + uint8_tCount) and _buf[1] == 0x01 and _buf[2] == uint8_tCount) {
-        for (unsigned int j = 0; j < quantity; j++) {
-          buf[j] = bitRead(_buf[3 + (j / 8)], j % 8);
-        }
-        return true;
-      }
-      if (i == 3 and _buf[1] == 0x81) _exceptionCode = _buf[2];
-      break;
+  _buf[1] = functionCode;
+  _buf[2] = highByte(startAddress);
+  _buf[3] = lowByte(startAddress);
+  _buf[4] = highByte(quantity);
+  _buf[5] = lowByte(quantity);
+  _writeRequest(6);
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  else {
+    for (uint16_t i = 0; i < quantity; i++) {
+      buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
     }
+    return quantity;
   }
-  return false;
+  return true;
 }
 
-boolean ModbusRTUMaster::readDiscreteInputs(uint8_t id, unsigned int startAddress, boolean *buf, unsigned int quantity) {
-  if (id ==0 or id >= 248 or quantity == 0 or quantity > 2000) return false;
+bool ModbusRTUMaster::readDiscreteInputs(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity) {
+  const uint8_t functionCode = 2;
+  uint8_t byteCount = _div8RndUp(quantity);
+  if (id < 1 || id > 247 || !buf || quantity == 0 || quantity > 2000) return false;
   _buf[0] = id;
-  _buf[1] = 0x02;
-  _buf[2] = highuint8_t(startAddress);
-  _buf[3] = lowuint8_t(startAddress);
-  _buf[4] = highuint8_t(quantity);
-  _buf[5] = lowuint8_t(quantity);
-  _transmit(6);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      uint8_t uint8_tCount = _div8RndUp(quantity);
-      if (i = (3 + uint8_tCount) and _buf[1] == 0x02 and _buf[2] == uint8_tCount) {
-        for (unsigned int j = 0; j < quantity; j++) {
-          buf[j] = bitRead(_buf[3 + (j / 8)], j % 8);
-        }
-        return true;
-      }
-      if (i == 3 and _buf[1] == 0x82) _exceptionCode = _buf[2];
-      break;
+  _buf[1] = functionCode;
+  _buf[2] = highByte(startAddress);
+  _buf[3] = lowByte(startAddress);
+  _buf[4] = highByte(quantity);
+  _buf[5] = lowByte(quantity);
+  _writeRequest(6);
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  else {
+    for (uint16_t i = 0; i < quantity; i++) {
+      buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
     }
+    return quantity;
   }
-  return false;
+  return true;
 }
 
-boolean ModbusRTUMaster::readHoldingRegisters(uint8_t id, unsigned int startAddress, unsigned int *buf, unsigned int quantity) {
-  if (id ==0 or id >= 248 or quantity == 0 or quantity > 125) return false;
+bool ModbusRTUMaster::readHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity) {
+  const uint8_t functionCode = 3;
+  uint8_t byteCount = quantity * 2;
+  if (id < 1 || id > 247 || !buf || quantity == 0 || quantity > 125) return false;
   _buf[0] = id;
-  _buf[1] = 0x03;
-  _buf[2] = highuint8_t(startAddress);
-  _buf[3] = lowuint8_t(startAddress);
-  _buf[4] = highuint8_t(quantity);
-  _buf[5] = lowuint8_t(quantity);
-  _transmit(6);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      uint8_t uint8_tCount = quantity * 2;
-      if (i = (3 + uint8_tCount) and _buf[1] == 0x03 and _buf[2] == uint8_tCount) {
-        for (unsigned int j = 0; j < quantity; j++) {
-          buf[j] = _uint8_tsToWord(_buf[3 + (j * 2)], _buf[4 + (j * 2)]);
-        }
-        return true;
-      }
-      if (i == 3 and _buf[1] == 0x83) _exceptionCode = _buf[2];
-      break;
+  _buf[1] = functionCode;
+  _buf[2] = highByte(startAddress);
+  _buf[3] = lowByte(startAddress);
+  _buf[4] = highByte(quantity);
+  _buf[5] = lowByte(quantity);
+  _writeRequest(6);
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  else {
+    for (uint16_t i = 0; i < quantity; i++) {
+      buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
     }
+    return true;
   }
-  return false;
 }
 
-boolean ModbusRTUMaster::readInputRegisters(uint8_t id, unsigned int startAddress, unsigned int *buf, unsigned int quantity) {
-  if (id ==0 or id >= 248 or quantity == 0 or quantity > 125) return false;
+bool ModbusRTUMaster::readInputRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity) {
+  const uint8_t functionCode = 4;
+  uint8_t byteCount = quantity * 2;
+  if (id < 1 || id > 247 || !buf || quantity == 0 || quantity > 125) return false;
   _buf[0] = id;
-  _buf[1] = 0x04;
-  _buf[2] = highuint8_t(startAddress);
-  _buf[3] = lowuint8_t(startAddress);
-  _buf[4] = highuint8_t(quantity);
-  _buf[5] = lowuint8_t(quantity);
-  _transmit(6);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      uint8_t uint8_tCount = quantity * 2;
-      if (i = (3 + uint8_tCount) and _buf[1] == 0x04 and _buf[2] == uint8_tCount) {
-        for (size_t j = 0; j < quantity; j++) {
-          buf[j] = _uint8_tsToWord(_buf[3 + (j * 2)], _buf[4 + (j * 2)]);
-        }
-        return true;
-      }
-      if (i == 3 and _buf[1] == 0x84) _exceptionCode = _buf[2];
-      break;
+  _buf[1] = functionCode;
+  _buf[2] = highByte(startAddress);
+  _buf[3] = lowByte(startAddress);
+  _buf[4] = highByte(quantity);
+  _buf[5] = lowByte(quantity);
+  _writeRequest(6);
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  else {
+    for (uint16_t i = 0; i < quantity; i++) {
+      buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
     }
+    return true;
   }
-  return false;
 }
 
-boolean ModbusRTUMaster::writeSingleCoil(uint8_t id, unsigned int address, boolean value) {
-  if (id ==0 or id >= 248) return false;
+bool ModbusRTUMaster::writeSingleCoil(uint8_t id, uint16_t address, bool value) {
+  const uint8_t functionCode = 5;
+  if (id > 247) return false;
   _buf[0] = id;
-  _buf[1] = 0x05;
-  _buf[2] = highuint8_t(address);
-  _buf[3] = lowuint8_t(address);
-  _buf[4] = value * 0xFF;
+  _buf[1] = functionCode;
+  _buf[2] = highByte(address);
+  _buf[3] = lowByte(address);
+  _buf[4] = value * 255;
   _buf[5] = 0;
-  _transmit(6);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      if (i = 6 and _buf[1] == 0x05 and _buf[2] == highuint8_t(address) and _buf[3] == lowuint8_t(address) and _buf[4] == (value * 0xFF) and _buf[5] == 0) return true;
-      if (i == 3 and _buf[1] == 0x85) _exceptionCode = _buf[2];
-      break;
-    }
-  }
-  return false;
+  _writeRequest(6);
+  if (id == 0) return true;
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != address || _buf[4] != (value * 255) || _buf[5] != 0) return false;
+  else return true;
 }
 
-boolean ModbusRTUMaster::writeSingleHoldingRegister(uint8_t id, unsigned int address, unsigned int value) {
-  if (id ==0 or id >= 248) return false;
+bool ModbusRTUMaster::writeSingleHoldingRegister(uint8_t id, uint16_t address, uint16_t value) {
+  const uint8_t functionCode = 6;
+  if (id > 247) return false;
   _buf[0] = id;
-  _buf[1] = 0x06;
-  _buf[2] = highuint8_t(address);
-  _buf[3] = lowuint8_t(address);
-  _buf[4] = highuint8_t(value);
-  _buf[5] = lowuint8_t(value);
-  _transmit(6);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      if (i = 6 and _buf[1] == 0x06 and _buf[2] == highuint8_t(address) and _buf[3] == lowuint8_t(address) and _buf[4] == highuint8_t(value) and _buf[5] == lowuint8_t(value)) return true;
-      if (i == 3 and _buf[1] == 0x86) _exceptionCode = _buf[2];
-      break;
-    }
-  }
-  return false;
+  _buf[1] = functionCode;
+  _buf[2] = highByte(address);
+  _buf[3] = lowByte(address);
+  _buf[4] = highByte(value);
+  _buf[5] = lowByte(value);
+  _writeRequest(6);
+  if (id == 0) return true;
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != address || _bytesToWord(_buf[4], _buf[5]) != value) return false;
+  else return true;
 }
 
-boolean ModbusRTUMaster::writeMultipleCoils(uint8_t id, unsigned int startAddress, boolean *buf, unsigned int quantity) {
-  if (id ==0 or id >= 248 or quantity == 0 or quantity > 1968) return false;
+bool ModbusRTUMaster::writeMultipleCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity) {
+  const uint8_t functionCode = 15;
+  uint8_t byteCount = _div8RndUp(quantity);
+  if (id > 247 || !buf || quantity == 0 || quantity > 1968) return false;
   _buf[0] = id;
-  _buf[1] = 0x0F;
-  _buf[2] = highuint8_t(startAddress);
-  _buf[3] = lowuint8_t(startAddress);
-  _buf[4] = highuint8_t(quantity);
-  _buf[5] = lowuint8_t(quantity);
-  uint8_t uint8_tCount = _div8RndUp(quantity);
-  _buf[6] = uint8_tCount;
-  for (unsigned int i = 0; i < quantity; i++) {
-    bitWrite(_buf[7 + (i / 8)], i % 8, buf[i]);
+  _buf[1] = functionCode;
+  _buf[2] = highByte(startAddress);
+  _buf[3] = lowByte(startAddress);
+  _buf[4] = highByte(quantity);
+  _buf[5] = lowByte(quantity);
+  _buf[6] = byteCount;
+  for (uint16_t i = 0; i < quantity; i++) {
+    bitWrite(_buf[7 + (i >> 3)], i & 7, buf[i]);
   }
-  for (unsigned int i = quantity; i < (uint8_tCount * 8); i++) {
-    bitClear(_buf[7 + (i / 8)], i % 8);
+  for (uint16_t i = quantity; i < (byteCount * 8); i++) {
+    bitClear(_buf[7 + (i >> 3)], i & 7);
   }
-  _transmit(7 + uint8_tCount);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      if (i = 6 and _buf[1] == 0x0F and _buf[2] == highuint8_t(startAddress) and _buf[3] == lowuint8_t(startAddress) and _buf[4] == highuint8_t(quantity) and _buf[5] == lowuint8_t(quantity)) return true;
-      if (i == 3 and _buf[1] == 0x8F) _exceptionCode = _buf[2];
-      break;
-    }
-  }
-  return false;
+  _writeRequest(7 + byteCount);
+  if (id == 0) return true;
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != startAddress || _bytesToWord(_buf[4], _buf[5]) != quantity) return false;
+  else return true;
 }
 
-boolean ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, unsigned int startAddress, unsigned int *buf, unsigned int quantity) {
-  if (id ==0 or id >= 248 or quantity == 0 or quantity > 123) return false;
+bool ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity) {
+  const uint8_t functionCode = 16;
+  uint8_t byteCount = quantity * 2;
+  if (id > 247 || !buf || quantity == 0 || quantity > 123) return false;
   _buf[0] = id;
-  _buf[1] = 0x10;
-  _buf[2] = highuint8_t(startAddress);
-  _buf[3] = lowuint8_t(startAddress);
-  _buf[4] = highuint8_t(quantity);
-  _buf[5] = lowuint8_t(quantity);
-  uint8_t uint8_tCount = quantity * 2;
-  _buf[6] = uint8_tCount;
-  for (unsigned int i = 0; i < quantity; i++) {
-    _buf[7 + (i * 2)] = highuint8_t(_buf[i]);
-    _buf[8 + (i * 2)] = lowuint8_t(_buf[i]);
+  _buf[1] = functionCode;
+  _buf[2] = highByte(startAddress);
+  _buf[3] = lowByte(startAddress);
+  _buf[4] = highByte(quantity);
+  _buf[5] = lowByte(quantity);
+  _buf[6] = byteCount;
+  for (uint16_t i = 0; i < quantity; i++) {
+    _buf[7 + (i * 2)] = highByte(_buf[i]);
+    _buf[8 + (i * 2)] = lowByte(_buf[i]);
   }
-  _transmit(7 + uint8_tCount);
-  unsigned long startTime = millis();
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available() > 0) {
-      size_t i = _receive();
-      if (i == 0) continue;
-      if (_buf[0] != id) break;
-      if (i = 6 and _buf[1] == 0x10 and _buf[2] == highuint8_t(startAddress) and _buf[3] == lowuint8_t(startAddress) and _buf[4] == highuint8_t(quantity) and _buf[5] == lowuint8_t(quantity)) return true;
-      if (i == 3 and _buf[1] == 0x90) _exceptionCode = _buf[2];
-      break;
-    }
-  }
-  return false;
+  _writeRequest(7 + byteCount);
+  uint16_t responseLength = _readResponse(id, functionCode);
+  if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != startAddress || _bytesToWord(_buf[4], _buf[5]) != quantity) return false;
+  else return true;
 }
 
 uint8_t ModbusRTUMaster::getExceptionCode() {
@@ -300,11 +241,11 @@ void ModbusRTUMaster::_setTimeouts(unsigned long baud, uint8_t config) {
     _frameTimeout = 1750;
   }
   else if (_hardwareSerial) {
-    if (config == 0x2E or config == 0x3E) {
+    if (config == 0x2E || config == 0x3E) {
       _charTimeout = 18000000/baud;
       _frameTimeout = 42000000/baud;
     }
-    else if (config == 0x0E or config == 0x26 or config == 0x36) {
+    else if (config == 0x0E || config == 0x26 || config == 0x36) {
       _charTimeout = 16500000/baud;
       _frameTimeout = 38500000/baud;
     }
@@ -327,9 +268,9 @@ void ModbusRTUMaster::_clearRxBuf() {
 
 
 void ModbusRTUMaster::_transmit(size_t len) {
-  unsigned int crc = _crc(len);
-  _buf[len] = lowuint8_t(crc);
-  _buf[len + 1] = highuint8_t(crc);
+  uint16_t crc = _crc(len);
+  _buf[len] = lowByte(crc);
+  _buf[len + 1] = highByte(crc);
   if (_dePin != NO_DE_PIN) digitalWrite(_dePin, HIGH);
   _serial->write(_buf, len + 2);
   _serial->flush();
@@ -348,16 +289,16 @@ size_t ModbusRTUMaster::_receive() {
     }
   } while (micros() - startTime < _charTimeout && i < MODBUS_RTU_MASTER_BUF_SIZE);
   while (micros() - startTime < _frameTimeout);
-  if (_serial->available() == 0 and _crc(i - 2) == _uint8_tsToWord(_buf[i - 1], _buf[i - 2])) return i - 2;
+  if (_serial->available() == 0 && _crc(i - 2) == _bytesToWord(_buf[i - 1], _buf[i - 2])) return i - 2;
   else return 0;
 }
 
-unsigned int ModbusRTUMaster::_crc(size_t len) {
-  unsigned int value = 0xFFFF;
+uint16_t ModbusRTUMaster::_crc(size_t len) {
+  uint16_t value = 0xFFFF;
   for (size_t i = 0; i < len; i++) {
-    value ^= (unsigned int)_buf[i];
+    value ^= (uint16_t)_buf[i];
     for (uint8_t j = 0; j < 8; j++) {
-      boolean lsb = value & 1;
+      bool lsb = value & 1;
       value >>= 1;
       if (lsb == true) value ^= 0xA001;
     }
@@ -365,10 +306,10 @@ unsigned int ModbusRTUMaster::_crc(size_t len) {
   return value;
 }
 
-unsigned int ModbusRTUMaster::_div8RndUp(unsigned int value) {
+uint16_t ModbusRTUMaster::_div8RndUp(uint16_t value) {
   return (value + 7) >> 3;
 }
 
-unsigned int ModbusRTUMaster::_uint8_tsToWord(uint8_t high, uint8_t low) {
+uint16_t ModbusRTUMaster::_bytesToWord(uint8_t high, uint8_t low) {
   return (high << 8) | low;
 }
