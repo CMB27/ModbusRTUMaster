@@ -230,30 +230,57 @@ bool ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, uint16_t startAd
   else return true;
 }
 
-uint8_t ModbusRTUMaster::getExceptionCode() {
-  return _exceptionCode;
+bool ModbusRTUMaster::getTimeoutFlag() {
+  return _timeoutFlag;
+}
+
+void ModbusRTUMaster::clearTimeoutFlag() {
+  _timeoutFlag = 0;
+}
+
+uint8_t ModbusRTUMaster::getExceptionResponse() {
+  return _exceptionResponse;
+}
+
+void ModbusRTUMaster::clearExceptionResponse() {
+  _exceptionResponse = 0;
 }
 
 
-void ModbusRTUMaster::_setTimeouts(unsigned long baud, uint8_t config) {
-  if (baud > 19200) {
-    _charTimeout = 750;
-    _frameTimeout = 1750;
-  }
-  else if (_hardwareSerial) {
-    if (config == 0x2E || config == 0x3E) {
-      _charTimeout = 18000000/baud;
-      _frameTimeout = 42000000/baud;
+
+void ModbusRTUMaster::_writeRequest(size_t len) {
+  uint16_t crc = _crc(len);
+  _buf[len] = lowByte(crc);
+  _buf[len + 1] = highByte(crc);
+  if (_dePin != NO_DE_PIN) digitalWrite(_dePin, HIGH);
+  _serial->write(_buf, len + 2);
+  _serial->flush();
+  if (_dePin != NO_DE_PIN) digitalWrite(_dePin, LOW);
+}
+
+uint16_t ModbusRTUMaster::_readResponse(uint8_t id, uint8_t functionCode) {
+  uint32_t startTime = millis();
+  uint16_t numBytes = 0;
+  while (millis() - startTime < _responseTimeout) {
+    if (_serial->available()) {
+      do {
+        if (_serial->available()) {
+          startTime = micros();
+          _buf[numBytes] = _serial->read();
+          numBytes++;
+        }
+      } while (micros() - startTime <= _charTimeout && numBytes < MODBUS_RTU_SLAVE_BUF_SIZE);
+      while (micros() - startTime < _frameTimeout);
+      if (_serial->available() || _buf[0] != id || (_buf[1] != functionCode && _buf[1] != (functionCode + 128)) || _crc(numBytes - 2) != _bytesToWord(_buf[numBytes - 1], _buf[numBytes - 2])) return 0;
+      else if (_buf[1] == (functionCode + 128)) {
+        _exceoptionResponse = _buf[3];
+        return 0;
+      }
+      else return (numBytes - 2);
     }
-    else if (config == 0x0E || config == 0x26 || config == 0x36) {
-      _charTimeout = 16500000/baud;
-      _frameTimeout = 38500000/baud;
-    }
   }
-  else {
-    _charTimeout = 15000000/baud;
-    _frameTimeout = 35000000/baud;
-  }
+  _timeoutFlag = true;
+  return 0;
 }
 
 void ModbusRTUMaster::_clearRxBuf() {
@@ -267,30 +294,20 @@ void ModbusRTUMaster::_clearRxBuf() {
 }
 
 
-void ModbusRTUMaster::_transmit(size_t len) {
-  uint16_t crc = _crc(len);
-  _buf[len] = lowByte(crc);
-  _buf[len + 1] = highByte(crc);
-  if (_dePin != NO_DE_PIN) digitalWrite(_dePin, HIGH);
-  _serial->write(_buf, len + 2);
-  _serial->flush();
-  if (_dePin != NO_DE_PIN) digitalWrite(_dePin, LOW);
-  _exceptionCode = 0;
-}
 
-size_t ModbusRTUMaster::_receive() {
-  size_t i = 0;
-  unsigned long startTime = 0;
-  do {
-    if (_serial->available() > 0) {
-      startTime = micros();
-      _buf[i] = _serial->read();
-      i++;
-    }
-  } while (micros() - startTime < _charTimeout && i < MODBUS_RTU_MASTER_BUF_SIZE);
-  while (micros() - startTime < _frameTimeout);
-  if (_serial->available() == 0 && _crc(i - 2) == _bytesToWord(_buf[i - 1], _buf[i - 2])) return i - 2;
-  else return 0;
+void ModbusRTUMaster::_calculateTimeouts(unsigned long baud, uint8_t config) {
+  uint32_t bitsPerChar;
+  if (config == SERIAL_8E2 || config == SERIAL_8O2) bitsPerChar = 12;
+  else if (config == SERIAL_8N2 || config == SERIAL_8E1 || config == SERIAL_8O1) bitsPerChar = 11;
+  else bitsPerChar = 10;
+  if (baud <= 19200) {
+    _charTimeout = (bitsPerChar * 2500000) / baud;
+    _frameTimeout = (bitsPerChar * 4500000) / baud;
+  }
+  else {
+    _charTimeout = (bitsPerChar * 1000000) / baud + 750;
+    _frameTimeout = (bitsPerChar * 1000000) / baud + 1750;
+  }
 }
 
 uint16_t ModbusRTUMaster::_crc(size_t len) {

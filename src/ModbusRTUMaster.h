@@ -24,12 +24,12 @@
 class ModbusRTUMaster {
   public:
     ModbusRTUMaster(HardwareSerial& serial, uint8_t dePin = NO_DE_PIN);
-#ifdef __AVR__
+    #ifdef __AVR__
     ModbusRTUMaster(SoftwareSerial& serial, uint8_t dePin = NO_DE_PIN);
-#endif
-#ifdef HAVE_CDCSERIAL
+    #endif
+    #ifdef HAVE_CDCSERIAL
     ModbusRTUMaster(Serial_& serial, uint8_t dePin = NO_DE_PIN);
-#endif
+    #endif
     void setTimeout(uint32_t timeout);
     void begin(uint32_t baud, uint8_t config = SERIAL_8N1);
     bool readCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity);
@@ -47,18 +47,20 @@ class ModbusRTUMaster {
 
   private:
     HardwareSerial *_hardwareSerial;
-#ifdef __AVR__
+    #ifdef __AVR__
     SoftwareSerial *_softwareSerial;
-#endif
-#ifdef HAVE_CDCSERIAL
+    #endif
+    #ifdef HAVE_CDCSERIAL
     Serial_ *_usbSerial;
-#endif
+    #endif
     Stream *_serial;
     uint8_t _dePin;
     uint8_t _buf[MODBUS_RTU_MASTER_BUF_SIZE];
     uint32_t _charTimeout;
     uint32_t _frameTimeout;
-    uint32_t _responseTimeout;
+    uint32_t _responseTimeout = 100;
+    bool _timeoutFlag = false;
+    uint8_t _exceptionResponse = 0;
     
     void __writeRequest(uint8_t len);
     uint16_t _readResponse(uint8_t id, uint8_t function);
