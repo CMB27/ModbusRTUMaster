@@ -62,7 +62,7 @@ class ModbusRTUMaster {
     bool _timeoutFlag = false;
     uint8_t _exceptionResponse = 0;
     
-    void __writeRequest(uint8_t len);
+    void _writeRequest(uint8_t len);
     uint16_t _readResponse(uint8_t id, uint8_t function);
     void _clearRxBuffer();
 

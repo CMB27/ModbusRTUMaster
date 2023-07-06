@@ -79,7 +79,7 @@ bool ModbusRTUMaster::readCoils(uint8_t id, uint16_t startAddress, bool *buf, ui
   _buf[5] = lowByte(quantity);
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
-  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
   else {
     for (uint16_t i = 0; i < quantity; i++) {
       buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
@@ -101,7 +101,7 @@ bool ModbusRTUMaster::readDiscreteInputs(uint8_t id, uint16_t startAddress, bool
   _buf[5] = lowByte(quantity);
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
-  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
   else {
     for (uint16_t i = 0; i < quantity; i++) {
       buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
@@ -123,7 +123,7 @@ bool ModbusRTUMaster::readHoldingRegisters(uint8_t id, uint16_t startAddress, ui
   _buf[5] = lowByte(quantity);
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
-  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
   else {
     for (uint16_t i = 0; i < quantity; i++) {
       buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
@@ -144,7 +144,7 @@ bool ModbusRTUMaster::readInputRegisters(uint8_t id, uint16_t startAddress, uint
   _buf[5] = lowByte(quantity);
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
-  if (responseLength != (3 + byteCount) || _buf[2] != byteCount) return false;
+  if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
   else {
     for (uint16_t i = 0; i < quantity; i++) {
       buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
@@ -248,7 +248,7 @@ void ModbusRTUMaster::clearExceptionResponse() {
 
 
 
-void ModbusRTUMaster::_writeRequest(size_t len) {
+void ModbusRTUMaster::_writeRequest(uint8_t len) {
   uint16_t crc = _crc(len);
   _buf[len] = lowByte(crc);
   _buf[len + 1] = highByte(crc);
@@ -269,11 +269,11 @@ uint16_t ModbusRTUMaster::_readResponse(uint8_t id, uint8_t functionCode) {
           _buf[numBytes] = _serial->read();
           numBytes++;
         }
-      } while (micros() - startTime <= _charTimeout && numBytes < MODBUS_RTU_SLAVE_BUF_SIZE);
+      } while (micros() - startTime <= _charTimeout && numBytes < MODBUS_RTU_MASTER_BUF_SIZE);
       while (micros() - startTime < _frameTimeout);
       if (_serial->available() || _buf[0] != id || (_buf[1] != functionCode && _buf[1] != (functionCode + 128)) || _crc(numBytes - 2) != _bytesToWord(_buf[numBytes - 1], _buf[numBytes - 2])) return 0;
       else if (_buf[1] == (functionCode + 128)) {
-        _exceoptionResponse = _buf[3];
+        _exceptionResponse = _buf[3];
         return 0;
       }
       else return (numBytes - 2);
@@ -283,7 +283,7 @@ uint16_t ModbusRTUMaster::_readResponse(uint8_t id, uint8_t functionCode) {
   return 0;
 }
 
-void ModbusRTUMaster::_clearRxBuf() {
+void ModbusRTUMaster::_clearRxBuffer() {
   unsigned long startTime = micros();
   do {
     if (_serial->available() > 0) {
@@ -310,7 +310,7 @@ void ModbusRTUMaster::_calculateTimeouts(unsigned long baud, uint8_t config) {
   }
 }
 
-uint16_t ModbusRTUMaster::_crc(size_t len) {
+uint16_t ModbusRTUMaster::_crc(uint8_t len) {
   uint16_t value = 0xFFFF;
   for (size_t i = 0; i < len; i++) {
     value ^= (uint16_t)_buf[i];
