@@ -221,10 +221,11 @@ bool ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, uint16_t startAd
   _buf[5] = lowByte(quantity);
   _buf[6] = byteCount;
   for (uint16_t i = 0; i < quantity; i++) {
-    _buf[7 + (i * 2)] = highByte(_buf[i]);
-    _buf[8 + (i * 2)] = lowByte(_buf[i]);
+    _buf[7 + (i * 2)] = highByte(buf[i]);
+    _buf[8 + (i * 2)] = lowByte(buf[i]);
   }
   _writeRequest(7 + byteCount);
+  if (id == 0) return true;
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != startAddress || _bytesToWord(_buf[4], _buf[5]) != quantity) return false;
   else return true;
