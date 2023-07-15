@@ -1,3 +1,22 @@
+/*
+  ModbusRTUMasterProbe
+
+  This sketch turns the Arduino into a Modbus master/client device that can be used to probe a modbus network.
+  This sketch uses SoftwareSerial to communicate with the Modbus network.
+  This is done so that the main hardware Serial port can be left available for USB communication on boards like the Arduino Uno and Arduino Nano.
+  Because of the limitations of SoftwareSerial the serial configurations is always 8-N-1.
+  Pin 10 is used as RX and pin 11 is used as TX. A DE pin is not configured.
+
+  Once the sketch is loaded, open the Serial Monitor. Make sure it is set to a baud rate of 9600.
+  The prompt will guide you through the process of reading or writing data on the modbus network, or changing the baud rate.
+  Basic knowledge of the Modbus protocol, the network parameters (serial baud rate and configuration), and the slave/server devices on the network (device addresses and data addresses) will be helpful.
+  The baud rate for the Modbus network is stored in EEPROM, so if you restart or reset the arduino, it should keep the baud setting.
+  
+  Created: 2023-07-15
+  By: C. M. Bulliner
+ 
+ */
+
 #include <ModbusRTUMaster.h>
 #include <EEPROM.h>
 
@@ -23,7 +42,7 @@ long selectValue(long minValue, long maxValue) {
   long value;
   while (1) {
     value = requestUserInput();
-    if (value < minValue or value > maxValue) Serial.println(F("Invalid value"));
+    if (value < minValue or value > maxValue) Serial.println(F("Invalid entry, try again"));
     else return value;
   }
 }
@@ -41,6 +60,8 @@ void selectBaud() {
   uint32_t baud = baudRates[selectValue(1, 8) - 1];
   EEPROM.put(baudEEPROMAddress, baud);
   modbus.begin(baud);
+  Serial.print(F("Baud rate set to "));
+  Serial.println(baud);
 }
 
 void processError() {
@@ -77,31 +98,59 @@ void processError() {
 
 void readSingleCoil(uint8_t id, uint16_t address) {
   bool value = 0;
-  if (modbus.readCoils(id, address, &value, 1)) Serial.println(value);
+  if (modbus.readCoils(id, address, &value, 1)) {
+    Serial.print(F("Read value of "));
+    Serial.print(value);
+    Serial.print(F(" from coil address "));
+    Serial.print(address);
+    Serial.print(F(" on slave/server device "));
+    Serial.println(id);
+  }
   else processError();
 }
 
 void readSingleDiscreteInput(uint8_t id, uint16_t address) {
   bool value = 0;
-  if (modbus.readDiscreteInputs(id, address, &value, 1)) Serial.println(value);
+  if (modbus.readDiscreteInputs(id, address, &value, 1)) {
+    Serial.print(F("Read value of "));
+    Serial.print(value);
+    Serial.print(F(" from discrete input address "));
+    Serial.print(address);
+    Serial.print(F(" on slave/server device "));
+    Serial.println(id);
+  }
   else processError();
 }
 
 void readSingleHoldingRegister(uint8_t id, uint16_t address) {
   uint16_t value = 0;
-  if (modbus.readHoldingRegisters(id, address, &value, 1)) Serial.println(value);
+  if (modbus.readHoldingRegisters(id, address, &value, 1)) {
+    Serial.print(F("Read value of "));
+    Serial.print(value);
+    Serial.print(F(" from holding register address "));
+    Serial.print(address);
+    Serial.print(F(" on slave/server device "));
+    Serial.println(id);
+  }
   else processError();
 }
 
 void readSingleInputRegister(uint8_t id, uint16_t address) {
   uint16_t value = 0;
-  if (modbus.readInputRegisters(id, address, &value, 1)) Serial.println(value);
+  if (modbus.readInputRegisters(id, address, &value, 1)) {
+    Serial.print(F("Read value of "));
+    Serial.print(value);
+    Serial.print(F(" from input register address "));
+    Serial.print(address);
+    Serial.print(F(" on slave/server device "));
+    Serial.println(id);
+  }
   else processError();
 }
 
 void readValue() {
   Serial.println(F("Enter device address to read from"));
-  Serial.println(F("Valid values: 1 - 247"));
+  Serial.println(F("Valid entries: 1 - 247"));
   uint8_t id = selectValue(1, 247);
   
   Serial.println(F("Select datatype to read"));
@@ -112,7 +161,7 @@ void readValue() {
   uint8_t datatype = selectValue(1, 4);
 
   Serial.println(F("Enter data addresss"));
-  Serial.println(F("Valid values: 0 - 65535"));
+  Serial.println(F("Valid entries: 0 - 65535"));
   uint16_t address = selectValue(0, 65535);
   
   switch (datatype) {
@@ -131,9 +180,40 @@ void readValue() {
   }
 }
 
+void writeSingleCoil(uint8_t id, uint16_t address) {
+  Serial.println(F("Select value to write"));
+  Serial.println(F("0 - False/off"));
+  Serial.println(F("1 - True/on"));
+  bool value = selectValue(0, 1);
+  if (modbus.writeSingleCoil(id, address, value)) {
+    Serial.print(F("Wrote value of "));
+    Serial.print(value);
+    Serial.print(F(" to coil address "));
+    Serial.print(address);
+    Serial.print(F(" on slave/server device "));
+    Serial.println(id);
+  }
+  else processError();
+}
+
+void writeSingleHoldingRegister(uint8_t id, uint16_t address) {
+  Serial.println(F("Enter value to write"));
+  Serial.println(F("Valid entries: 0 - 65535"));
+  uint16_t value = selectValue(0, 65535);
+  if (modbus.writeSingleHoldingRegister(id, address, value)) {
+    Serial.print(F("Wrote value of "));
+    Serial.print(value);
+    Serial.print(F(" to holding register address "));
+    Serial.print(address);
+    Serial.print(F(" on slave/server device "));
+    Serial.println(id);
+  }
+  else processError();
+}
+
 void writeValue() {
   Serial.println(F("Enter device address to write to"));
-  Serial.println(F("Valid values: 0 - 247"));
+  Serial.println(F("Valid entries: 0 - 247"));
   Serial.println(F("0 indicates a broadcast message"));
   uint8_t id = selectValue(0, 247);
   
@@ -143,20 +223,15 @@ void writeValue() {
   uint8_t datatype = selectValue(1, 2);
 
   Serial.println(F("Enter data addresss"));
-  Serial.println(F("Valid values: 0 - 65535"));
+  Serial.println(F("Valid entries: 0 - 65535"));
   uint16_t address = selectValue(0, 65535);
   
   switch (datatype) {
     case 1:
-      Serial.println(F("Select select value to write"));
-      Serial.println(F("0 - False"));
-      Serial.println(F("1 - True"));
-      if (!modbus.writeSingleCoil(id, address, (bool)selectValue(0, 1))) processError();
+      writeSingleCoil(id, address);
       break;
     case 2:
-      Serial.println(F("Enter value to write"));
-      Serial.println(F("Valid values: 0 - 65535"));
-      if (!modbus.writeSingleHoldingRegister(id, address, (uint16_t)selectValue(0, 65535))) processError();
+      writeSingleHoldingRegister(id, address);
       break;
   }
 }
@@ -165,6 +240,8 @@ void setup() {
   Serial.begin(9600);
   Serial.setTimeout(100);
   while(!Serial) {}
+
+  Serial.println(F("ModbusRTUMasterProbe"));
 
   uint32_t baud;
   EEPROM.get(baudEEPROMAddress, baud);
@@ -177,22 +254,24 @@ void setup() {
   Serial.print(F("Modbus serial port configuration: "));
   Serial.print(baud);
   Serial.println(F("-8-N-1"));
+  Serial.println();
 }
 
 void loop() {
-  Serial.println(F("Select action"));
-  Serial.println(F("1 - Set baud rate"));
-  Serial.println(F("2 - Read value"));
-  Serial.println(F("3 - Write value"));
+  Serial.println(F("Select an action"));
+  Serial.println(F("1 - Read value"));
+  Serial.println(F("2 - Write value"));
+  Serial.println(F("3 - Set baud rate"));
   switch (selectValue(1, 3)) {
     case 1:
-      selectBaud();
-      break;
-    case 2:
       readValue();
       break;
-    case 3:
+    case 2:
       writeValue();
       break;
+    case 3:
+      selectBaud();
+      break;
   }
+  Serial.println();
 }

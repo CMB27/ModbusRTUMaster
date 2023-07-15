@@ -7,7 +7,7 @@ const uint8_t slaveId = 1;
 const uint16_t numCoils = 4;
 const uint16_t numDiscreteInputs = 4;
 const uint16_t numHoldingRegisters = 4;
-const uint16_t numInputRegisters = 1;
+const uint16_t numInputRegisters = 4;
 
 bool coils[numCoils];
 bool discreteInputs[numDiscreteInputs];
@@ -22,7 +22,7 @@ void setup() {
   Serial.setTimeout(10);
   while(!Serial);
   
-  modbus.begin(38400); // modbus baud rate, config (optional)
+  modbus.begin(9600); // modbus baud rate, config (optional)
   modbus.setTimeout(100);
 }
 
