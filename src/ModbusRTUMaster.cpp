@@ -274,7 +274,7 @@ uint16_t ModbusRTUMaster::_readResponse(uint8_t id, uint8_t functionCode) {
       while (micros() - startTime < _frameTimeout);
       if (_serial->available() || _buf[0] != id || (_buf[1] != functionCode && _buf[1] != (functionCode + 128)) || _crc(numBytes - 2) != _bytesToWord(_buf[numBytes - 1], _buf[numBytes - 2])) return 0;
       else if (_buf[1] == (functionCode + 128)) {
-        _exceptionResponse = _buf[3];
+        _exceptionResponse = _buf[2];
         return 0;
       }
       else return (numBytes - 2);

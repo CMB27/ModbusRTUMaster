@@ -1,148 +1,198 @@
 #include <ModbusRTUMaster.h>
+#include <EEPROM.h>
 
 const uint8_t rxPin = 10;
 const uint8_t txPin = 11;
 
+const uint32_t baudRates[8] = {1200, 2400, 4800, 9600, 16200, 38400, 57600, 115200};
+const int baudEEPROMAddress = 0;
+
 SoftwareSerial mySerial(rxPin, txPin);
 ModbusRTUMaster modbus(mySerial); // serial port, driver enable pin for rs-485 (optional)
 
-void setup() {
-  Serial.begin(115200);
-  Serial.setTimeout(10);
-  while(!Serial);
-  
-  modbus.begin(38400); // modbus baud rate, config (optional)
-  modbus.setTimeout(100);
+long requestUserInput() {
+  Serial.print("> ");
+  while (!Serial.available()) {}
+  String userInput = Serial.readStringUntil('\n');
+  userInput.trim();
+  Serial.println(userInput);
+  return userInput.toInt();
 }
 
-void loop() {
-  if (Serial.available()) {
-    String command = Serial.readStringUntil('\n');
-    command.trim();
-    
-    int index[4] = {0, 0, 0, 0};
-    unsigned int argumentCount = 0;
-    long arguments[4];
-    for (byte i = 0; i < 4; i++) {
-      if (i == 0) index[i] = command.indexOf(' ');
-      else index[i] = command.indexOf(' ', index[i - 1]);
-      if (index[i] == -1) break;
-      else {
-        String temp = command.substring(index[i] + 1);
-        argument[i] = temp.toInt();
-        argumentCount++;
-      }
-    }
-
-    if (index[0] != -1) command.remove(index[0]);
-
-    if (!command.equals("readCoil") and !command.equals("readInput") and !command.equals("readHReg") and !command.equals("readIReg") and !command.equals("writeCoil") and !command.equals("writeHReg")) Serial.println ("invalid command");
-    else if ((command.startsWith("read") and argumentCount < 2) or (command.startsWith("write") and argumentCount < 3)) Serial.println("too few arguments");
-    else if ((command.startsWith("read") and argumentCount > 2) or (command.startsWith("write") and argumentCount > 3)) Serial.println("too many arguments");
-    else if (command.equals("readCoil")) {
-      bool coils[1];
-      if (!modbus.readCoils(argument[0], argument[1], coils, 1)) error();
-      else Serial.println(coils[1]);
-    }
-    else if (command.equals("readInput")) {
-      
-    }
-    else if (command.startsWith("readHReg")) {
-      
-    }
-    else if (command.startsWith("readIReg")) {
-      
-    }
-    else if (command.startsWith("write") {
-      String arg1String = command.substring(index[0], index[1]);
-      String arg2String = command.substring(index[1], index[2]);
-      String arg3String = command.substring(index[2]);
-      if (command.startsWith("writeCoil")) {
-        
-      }
-      else if (command.startsWith("writeHReg")) {
-        
-      }
-    }
-    
-
-    
-    
-    
-
-
-
-    
-    int index = topic.indexOf(' ');
-    if (index != -1) {
-      String payload = topic.substring(index + 1);
-      topic.remove(index);
-      if      (topic == "coil1") modbus.writeSingleCoil(slaveId, 0x2000, (bool)payload.toInt());
-      else if (topic == "coil2") modbus.writeSingleCoil(slaveId, 0x2001, (bool)payload.toInt());
-      else if (topic == "coil3") modbus.writeSingleCoil(slaveId, 0x2002, (bool)payload.toInt());
-      else if (topic == "coil4") modbus.writeSingleCoil(slaveId, 0x2003, (bool)payload.toInt());
-      else if (topic == "hreg1") modbus.writeSingleHoldingRegister(slaveId, 0x0000, (uint16_t)payload.toInt());
-      else if (topic == "hreg2") modbus.writeSingleHoldingRegister(slaveId, 0x0001, (uint16_t)payload.toInt());
-      else if (topic == "hreg3") modbus.writeSingleHoldingRegister(slaveId, 0x0002, (uint16_t)payload.toInt());
-      else if (topic == "hreg4") modbus.writeSingleHoldingRegister(slaveId, 0x0003, (uint16_t)payload.toInt());
-    }
-    
-    modbus.readCoils(slaveId, 0x2000, coils, numCoils); // slave id/address, starting data address, buffer, number of coils to read
-    modbus.readDiscreteInputs(slaveId, 0x0000, discreteInputs, numDiscreteInputs); // slave id/address, starting data address, buffer, number of discrete inputs to read
-    modbus.readHoldingRegisters(slaveId, 0x0000, holdingRegisters, numHoldingRegisters); // slave id/address, starting data address, buffer, number of holding registers to read
-    modbus.readInputRegisters(slaveId, 0xE000, inputRegisters, numInputRegisters); // slave id/address, starting data address, buffer, number of input registers to read
-    
-    Serial.print(topic);
-    Serial.print(' ');
-    if (topic == "?") {
-      Serial.println();
-      Serial.println(F("ModbusRTUMasterExample"));
-      Serial.println();
-      Serial.println(F("| TOPIC  | R/W | RANGE      |"));
-      Serial.println(F("|--------|-----|------------|"));
-      Serial.println(F("| coil1  | R/W | 0 or 1     |"));
-      Serial.println(F("| coil2  | R/W | 0 or 1     |"));
-      Serial.println(F("| coil3  | R/W | 0 or 1     |"));
-      Serial.println(F("| coil4  | R/W | 0 or 1     |"));
-      Serial.println(F("| input1 | R   | 0 or 1     |"));
-      Serial.println(F("| input2 | R   | 0 or 1     |"));
-      Serial.println(F("| input3 | R   | 0 or 1     |"));
-      Serial.println(F("| input4 | R   | 0 or 1     |"));
-      Serial.println(F("| hreg1  | R/W | 0 to 65535 |"));
-      Serial.println(F("| hreg2  | R/W | 0 to 65535 |"));
-      Serial.println(F("| hreg3  | R/W | 0 to 65535 |"));
-      Serial.println(F("| hreg4  | R/W | 0 to 65535 |"));
-      Serial.println(F("| inreg1 | R   | 0 to 65535 |"));
-      Serial.println();
-    }
-    else if (topic == "coil1")  Serial.print(coils[0]);
-    else if (topic == "coil2")  Serial.print(coils[1]);
-    else if (topic == "coil3")  Serial.print(coils[2]);
-    else if (topic == "coil4")  Serial.print(coils[3]);
-    else if (topic == "input1") Serial.print(discreteInputs[0]);
-    else if (topic == "input2") Serial.print(discreteInputs[1]);
-    else if (topic == "input3") Serial.print(discreteInputs[2]);
-    else if (topic == "input4") Serial.print(discreteInputs[3]);
-    else if (topic == "hreg1")  Serial.print(holdingRegisters[0]);
-    else if (topic == "hreg2")  Serial.print(holdingRegisters[1]);
-    else if (topic == "hreg3")  Serial.print(holdingRegisters[2]);
-    else if (topic == "hreg4")  Serial.print(holdingRegisters[3]);
-    else if (topic == "inreg1") Serial.print(inputRegisters[0]);
-    Serial.println();
+long selectValue(long minValue, long maxValue) {
+  long value;
+  while (1) {
+    value = requestUserInput();
+    if (value < minValue or value > maxValue) Serial.println(F("Invalid value"));
+    else return value;
   }
 }
 
-void error() {
+void selectBaud() {
+  Serial.println(F("Select baud rate"));
+  Serial.println(F("1 --- 1200"));
+  Serial.println(F("2 --- 2400"));
+  Serial.println(F("3 --- 4800"));
+  Serial.println(F("4 --- 9600"));
+  Serial.println(F("5 -- 19200"));
+  Serial.println(F("6 -- 38400"));
+  Serial.println(F("7 -- 57600"));
+  Serial.println(F("8 - 115200"));
+  uint32_t baud = baudRates[selectValue(1, 8) - 1];
+  EEPROM.put(baudEEPROMAddress, baud);
+  modbus.begin(baud);
+}
+
+void processError() {
   if (modbus.getTimeoutFlag()) {
-    Serial.println("connection timed out");
+    Serial.println(F("Connection timed out"));
     modbus.clearTimeoutFlag();
   }
   else if (modbus.getExceptionResponse() != 0) {
-    Serial.print("exception response ");
-    Serial.println(modbus.getExceptionResponse());
+    Serial.print(F("Received exception response: "));
+    Serial.print(modbus.getExceptionResponse());
+    switch (modbus.getExceptionResponse()) {
+      case 1:
+        Serial.println(F(" - Illegal function"));
+        break;
+      case 2:
+        Serial.println(F(" - Illegal data address"));
+        break;
+      case 3:
+        Serial.println(F(" - Illegal data value"));
+        break;
+      case 4:
+        Serial.println(F(" - Server device failure"));
+        break;
+      default:
+        Serial.println();
+        break;
+    }
     modbus.clearExceptionResponse();
   }
   else {
-    Serial.println("an error occurred");
+    Serial.println("An error occurred");
+  }
+}
+
+void readSingleCoil(uint8_t id, uint16_t address) {
+  bool value = 0;
+  if (modbus.readCoils(id, address, &value, 1)) Serial.println(value);
+  else processError();
+}
+
+void readSingleDiscreteInput(uint8_t id, uint16_t address) {
+  bool value = 0;
+  if (modbus.readDiscreteInputs(id, address, &value, 1)) Serial.println(value);
+  else processError();
+}
+
+void readSingleHoldingRegister(uint8_t id, uint16_t address) {
+  uint16_t value = 0;
+  if (modbus.readHoldingRegisters(id, address, &value, 1)) Serial.println(value);
+  else processError();
+}
+
+void readSingleInputRegister(uint8_t id, uint16_t address) {
+  uint16_t value = 0;
+  if (modbus.readInputRegisters(id, address, &value, 1)) Serial.println(value);
+  else processError();
+}
+
+void readValue() {
+  Serial.println(F("Enter device address to read from"));
+  Serial.println(F("Valid values: 1 - 247"));
+  uint8_t id = selectValue(1, 247);
+  
+  Serial.println(F("Select datatype to read"));
+  Serial.println(F("1 - Coil"));
+  Serial.println(F("2 - Discrete input"));
+  Serial.println(F("3 - Holding register"));
+  Serial.println(F("4 - Input register"));
+  uint8_t datatype = selectValue(1, 4);
+
+  Serial.println(F("Enter data addresss"));
+  Serial.println(F("Valid values: 0 - 65535"));
+  uint16_t address = selectValue(0, 65535);
+  
+  switch (datatype) {
+    case 1:
+      readSingleCoil(id, address);
+      break;
+    case 2:
+      readSingleDiscreteInput(id, address);
+      break;
+    case 3:
+      readSingleHoldingRegister(id, address);
+      break;
+    case 4:
+      readSingleInputRegister(id, address);
+      break;
+  }
+}
+
+void writeValue() {
+  Serial.println(F("Enter device address to write to"));
+  Serial.println(F("Valid values: 0 - 247"));
+  Serial.println(F("0 indicates a broadcast message"));
+  uint8_t id = selectValue(0, 247);
+  
+  Serial.println(F("Select datatype to write"));
+  Serial.println(F("1 - Coil"));
+  Serial.println(F("2 - Holding register"));
+  uint8_t datatype = selectValue(1, 2);
+
+  Serial.println(F("Enter data addresss"));
+  Serial.println(F("Valid values: 0 - 65535"));
+  uint16_t address = selectValue(0, 65535);
+  
+  switch (datatype) {
+    case 1:
+      Serial.println(F("Select select value to write"));
+      Serial.println(F("0 - False"));
+      Serial.println(F("1 - True"));
+      if (!modbus.writeSingleCoil(id, address, (bool)selectValue(0, 1))) processError();
+      break;
+    case 2:
+      Serial.println(F("Enter value to write"));
+      Serial.println(F("Valid values: 0 - 65535"));
+      if (!modbus.writeSingleHoldingRegister(id, address, (uint16_t)selectValue(0, 65535))) processError();
+      break;
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  Serial.setTimeout(100);
+  while(!Serial) {}
+
+  uint32_t baud;
+  EEPROM.get(baudEEPROMAddress, baud);
+  if (baud == 0xFFFFFFFF) {
+    baud = 9600;
+    EEPROM.put(baudEEPROMAddress, baud);
+  }
+  modbus.begin(baud); // modbus baud rate, config (optional)
+  modbus.setTimeout(100);
+  Serial.print(F("Modbus serial port configuration: "));
+  Serial.print(baud);
+  Serial.println(F("-8-N-1"));
+}
+
+void loop() {
+  Serial.println(F("Select action"));
+  Serial.println(F("1 - Set baud rate"));
+  Serial.println(F("2 - Read value"));
+  Serial.println(F("3 - Write value"));
+  switch (selectValue(1, 3)) {
+    case 1:
+      selectBaud();
+      break;
+    case 2:
+      readValue();
+      break;
+    case 3:
+      writeValue();
+      break;
   }
 }
