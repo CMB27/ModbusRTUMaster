@@ -1,90 +1,76 @@
+/*
+  ModbusRTUMasterExample
+  
+  This example demonstrates how to setup and use the ModbusRTUMaster library.
+  It is intended to be used with a second board running ModbusRTUSlaveExample from the ModbusRTUSlave library.  
+  
+  Circuit:
+  - A pushbutton switch from pin 2 to GND
+  - A pushbutton switch from pin 3 to GND
+  - A LED from pin 5 to GND with a 330 ohm series resistor
+  - A LED from pin 6 to GND with a 330 ohm series resistor
+  - A LED from pin 7 to GND with a 330 ohm series resistor
+  - A LED from pin 8 to GND with a 330 ohm series resistor
+  - The center pin of a potentiometer to pin A0, and the outside pins of the potentiometer to 5V and GND
+  - The center pin of a potentiometer to pin A0, and the outside pins of the potentiometer to 5V and GND
+  
+  !!! If your board's logic voltage is 3.3V, use 3.3V instead of 5V; if in doubt use the IOREF pin !!!
+  
+  - pin 10 to pin 11 of the slave/server board
+  - pin 11 to pin 10 of the slave/server board
+  - GND to GND of the slave/server board
+  
+  A schematic and illustration of the circuit is in the extras folder of the ModbusRTUMaster library.
+  
+  Created: 2023-07-22
+  By: C.M. Bulliner
+  
+*/
+
+#include <SoftwareSerial.h>
 #include <ModbusRTUMaster.h>
+
+const byte ledPins[4] = {8, 7, 6, 5};
+const byte buttonPins[2] = {3, 2};
+const byte potPins[2] = {A0, A1};
 
 const uint8_t rxPin = 10;
 const uint8_t txPin = 11;
-const uint8_t slaveId = 1;
-
-const uint16_t numCoils = 4;
-const uint16_t numDiscreteInputs = 4;
-const uint16_t numHoldingRegisters = 4;
-const uint16_t numInputRegisters = 4;
-
-bool coils[numCoils];
-bool discreteInputs[numDiscreteInputs];
-uint16_t holdingRegisters[numHoldingRegisters];
-uint16_t inputRegisters[numInputRegisters];
 
 SoftwareSerial mySerial(rxPin, txPin);
 ModbusRTUMaster modbus(mySerial); // serial port, driver enable pin for rs-485 (optional)
 
+bool coils[2];
+bool discreteInputs[2];
+uint16_t holdingRegisters[2];
+uint16_t inputRegisters[2];
+
 void setup() {
-  Serial.begin(9600);
-  Serial.setTimeout(10);
-  while(!Serial);
+  pinMode(ledPins[0], OUTPUT);
+  pinMode(ledPins[1], OUTPUT);
+  pinMode(ledPins[2], OUTPUT);
+  pinMode(ledPins[3], OUTPUT);
+  pinMode(buttonPins[0], INPUT_PULLUP);
+  pinMode(buttonPins[1], INPUT_PULLUP);
+  pinMode(potPins[0], INPUT);
+  pinMode(potPins[1], INPUT);
   
-  modbus.begin(9600); // modbus baud rate, config (optional)
-  modbus.setTimeout(100);
+  modbus.begin(38400); // baud rate, config (optional)
 }
 
 void loop() {
-  if (Serial.available()) {
-    String topic = Serial.readStringUntil('\n');
-    topic.trim();
-    int index = topic.indexOf(' ');
-    if (index != -1) {
-      String payload = topic.substring(index + 1);
-      topic.remove(index);
-      if      (topic == "coil1") modbus.writeSingleCoil(slaveId, 0x2000, (bool)payload.toInt());
-      else if (topic == "coil2") modbus.writeSingleCoil(slaveId, 0x2001, (bool)payload.toInt());
-      else if (topic == "coil3") modbus.writeSingleCoil(slaveId, 0x2002, (bool)payload.toInt());
-      else if (topic == "coil4") modbus.writeSingleCoil(slaveId, 0x2003, (bool)payload.toInt());
-      else if (topic == "hreg1") modbus.writeSingleHoldingRegister(slaveId, 0x0000, (uint16_t)payload.toInt());
-      else if (topic == "hreg2") modbus.writeSingleHoldingRegister(slaveId, 0x0001, (uint16_t)payload.toInt());
-      else if (topic == "hreg3") modbus.writeSingleHoldingRegister(slaveId, 0x0002, (uint16_t)payload.toInt());
-      else if (topic == "hreg4") modbus.writeSingleHoldingRegister(slaveId, 0x0003, (uint16_t)payload.toInt());
-    }
-    
-    modbus.readCoils(slaveId, 0x2000, coils, numCoils); // slave id/address, starting data address, buffer, number of coils to read
-    modbus.readDiscreteInputs(slaveId, 0x0000, discreteInputs, numDiscreteInputs); // slave id/address, starting data address, buffer, number of discrete inputs to read
-    modbus.readHoldingRegisters(slaveId, 0x0000, holdingRegisters, numHoldingRegisters); // slave id/address, starting data address, buffer, number of holding registers to read
-    modbus.readInputRegisters(slaveId, 0xE000, inputRegisters, numInputRegisters); // slave id/address, starting data address, buffer, number of input registers to read
-    
-    Serial.print(topic);
-    Serial.print(' ');
-    if (topic == "?") {
-      Serial.println();
-      Serial.println(F("ModbusRTUMasterExample"));
-      Serial.println();
-      Serial.println(F("| TOPIC  | R/W | RANGE      |"));
-      Serial.println(F("|--------|-----|------------|"));
-      Serial.println(F("| coil1  | R/W | 0 or 1     |"));
-      Serial.println(F("| coil2  | R/W | 0 or 1     |"));
-      Serial.println(F("| coil3  | R/W | 0 or 1     |"));
-      Serial.println(F("| coil4  | R/W | 0 or 1     |"));
-      Serial.println(F("| input1 | R   | 0 or 1     |"));
-      Serial.println(F("| input2 | R   | 0 or 1     |"));
-      Serial.println(F("| input3 | R   | 0 or 1     |"));
-      Serial.println(F("| input4 | R   | 0 or 1     |"));
-      Serial.println(F("| hreg1  | R/W | 0 to 65535 |"));
-      Serial.println(F("| hreg2  | R/W | 0 to 65535 |"));
-      Serial.println(F("| hreg3  | R/W | 0 to 65535 |"));
-      Serial.println(F("| hreg4  | R/W | 0 to 65535 |"));
-      Serial.println(F("| inreg1 | R   | 0 to 65535 |"));
-      Serial.println();
-    }
-    else if (topic == "coil1")  Serial.print(coils[0]);
-    else if (topic == "coil2")  Serial.print(coils[1]);
-    else if (topic == "coil3")  Serial.print(coils[2]);
-    else if (topic == "coil4")  Serial.print(coils[3]);
-    else if (topic == "input1") Serial.print(discreteInputs[0]);
-    else if (topic == "input2") Serial.print(discreteInputs[1]);
-    else if (topic == "input3") Serial.print(discreteInputs[2]);
-    else if (topic == "input4") Serial.print(discreteInputs[3]);
-    else if (topic == "hreg1")  Serial.print(holdingRegisters[0]);
-    else if (topic == "hreg2")  Serial.print(holdingRegisters[1]);
-    else if (topic == "hreg3")  Serial.print(holdingRegisters[2]);
-    else if (topic == "hreg4")  Serial.print(holdingRegisters[3]);
-    else if (topic == "inreg1") Serial.print(inputRegisters[0]);
-    Serial.println();
-  }
+  coils[0] = !digitalRead(buttonPins[0]);
+  coils[1] = !digitalRead(buttonPins[1]);
+  holdingRegisters[0] = map(analogRead(potPins[0]), 0, 1023, 0, 255);
+  holdingRegisters[1] = map(analogRead(potPins[1]), 0, 1023, 0, 255);
+  
+  modbus.writeMultipleCoils(1, 0, coils, 2);                       // slave id, starting data address, bool array of coil values, number of coils to write
+  modbus.writeMultipleHoldingRegisters(1, 0, holdingRegisters, 2); // slave id, starting data address, unsigned 16 bit integer array of holding register values, number of holding registers to write
+  modbus.readDiscreteInputs(1, 0, discreteInputs, 2);              // slave id, starting data address, bool array to place discrete input values, number of discrete inputs to read
+  modbus.readInputRegisters(1, 0, inputRegisters, 2);              // slave id, starting data address, unsigned 16 bit integer array to place input register values, number of input registers to read
+  
+  digitalWrite(ledPins[0], discreteInputs[0]);
+  digitalWrite(ledPins[1], discreteInputs[1]);
+  analogWrite(ledPins[2], inputRegisters[0]);
+  analogWrite(ledPins[3], inputRegisters[1]);
 }

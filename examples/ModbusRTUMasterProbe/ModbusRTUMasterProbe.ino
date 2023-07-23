@@ -1,12 +1,12 @@
 /*
   ModbusRTUMasterProbe
-
+  
   This sketch turns the Arduino into a Modbus master/client device that can be used to probe a modbus network.
   This sketch uses SoftwareSerial to communicate with the Modbus network.
   This is done so that the main hardware Serial port can be left available for USB communication on boards like the Arduino Uno and Arduino Nano.
   Because of the limitations of SoftwareSerial the serial configurations is always 8-N-1.
   Pin 10 is used as RX and pin 11 is used as TX. A DE pin is not configured.
-
+  
   Once the sketch is loaded, open the Serial Monitor. Make sure it is set to a baud rate of 9600.
   The prompt will guide you through the process of reading or writing data on the modbus network, or changing the baud rate.
   Basic knowledge of the Modbus protocol, the network parameters (serial baud rate and configuration), and the slave/server devices on the network (device addresses and data addresses) will be helpful.
@@ -14,9 +14,10 @@
   
   Created: 2023-07-15
   By: C. M. Bulliner
- 
- */
+  
+*/
 
+#include <SoftwareSerial.h>
 #include <ModbusRTUMaster.h>
 #include <EEPROM.h>
 
@@ -246,7 +247,7 @@ void setup() {
   uint32_t baud;
   EEPROM.get(baudEEPROMAddress, baud);
   if (baud == 0xFFFFFFFF) {
-    baud = 9600;
+    baud = 38400;
     EEPROM.put(baudEEPROMAddress, baud);
   }
   modbus.begin(baud); // modbus baud rate, config (optional)
