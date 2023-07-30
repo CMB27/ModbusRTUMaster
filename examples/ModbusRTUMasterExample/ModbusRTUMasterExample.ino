@@ -21,9 +21,13 @@
   - GND to GND of the slave/server board
   
   A schematic and illustration of the circuit is in the extras folder of the ModbusRTUMaster library.
+
+  - Pin 13 is set up as the driver enable pin. This pin will be HIGH whenever the board is transmitting.
   
   Created: 2023-07-22
-  By: C.M. Bulliner
+  By: C. M. Bulliner
+  Modified: 2023-07-29
+  By: C. M. Bulliner
   
 */
 
@@ -36,9 +40,10 @@ const byte potPins[2] = {A0, A1};
 
 const uint8_t rxPin = 10;
 const uint8_t txPin = 11;
+const uint8_t dePin = 13;
 
 SoftwareSerial mySerial(rxPin, txPin);
-ModbusRTUMaster modbus(mySerial); // serial port, driver enable pin for rs-485 (optional)
+ModbusRTUMaster modbus(mySerial, dePin); // serial port, driver enable pin for rs-485 (optional)
 
 bool coils[2];
 bool discreteInputs[2];

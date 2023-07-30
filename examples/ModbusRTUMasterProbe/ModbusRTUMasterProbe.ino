@@ -5,14 +5,17 @@
   This sketch uses SoftwareSerial to communicate with the Modbus network.
   This is done so that the main hardware Serial port can be left available for USB communication on boards like the Arduino Uno and Arduino Nano.
   Because of the limitations of SoftwareSerial the serial configurations is always 8-N-1.
-  Pin 10 is used as RX and pin 11 is used as TX. A DE pin is not configured.
+  Pin 10 is used as RX and pin 11 is used as TX.
+  Pin 13 is configured as the DE pin.
   
-  Once the sketch is loaded, open the Serial Monitor. Make sure it is set to a baud rate of 9600.
-  The prompt will guide you through the process of reading or writing data on the modbus network, or changing the baud rate.
-  Basic knowledge of the Modbus protocol, the network parameters (serial baud rate and configuration), and the slave/server devices on the network (device addresses and data addresses) will be helpful.
-  The baud rate for the Modbus network is stored in EEPROM, so if you restart or reset the arduino, it should keep the baud setting.
+  Once the sketch is loaded, open the Serial Monitor. Make sure the terminal baud rate is set to 9600.
+  The prompt will guide you through the process of reading or writing data on the modbus network, or changing the Modbus baud rate.
+  Basic knowledge of the Modbus protocol, the network parameters (baud rate and configuration), and the slave/server devices on the network (device addresses and data addresses) will be helpful.
+  The baud rate for the Modbus network is stored in EEPROM, so if you restart or reset the arduino, it should keep this setting.
   
   Created: 2023-07-15
+  By: C. M. Bulliner
+  Modified: 2023-07-29
   By: C. M. Bulliner
   
 */
@@ -23,12 +26,13 @@
 
 const uint8_t rxPin = 10;
 const uint8_t txPin = 11;
+const uint8_t dePin = 13;
 
 const uint32_t baudRates[8] = {1200, 2400, 4800, 9600, 16200, 38400, 57600, 115200};
 const int baudEEPROMAddress = 0;
 
 SoftwareSerial mySerial(rxPin, txPin);
-ModbusRTUMaster modbus(mySerial); // serial port, driver enable pin for rs-485 (optional)
+ModbusRTUMaster modbus(mySerial, dePin); // serial port, driver enable pin for rs-485 (optional)
 
 long requestUserInput() {
   Serial.print("> ");
