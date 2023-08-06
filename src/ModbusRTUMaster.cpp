@@ -262,26 +262,26 @@ void ModbusRTUMaster::_writeRequest(uint8_t len) {
 uint16_t ModbusRTUMaster::_readResponse(uint8_t id, uint8_t functionCode) {
   uint32_t startTime = millis();
   uint16_t numBytes = 0;
-  while (millis() - startTime < _responseTimeout) {
-    if (_serial->available()) {
-      do {
-        if (_serial->available()) {
-          startTime = micros();
-          _buf[numBytes] = _serial->read();
-          numBytes++;
-        }
-      } while (micros() - startTime <= _charTimeout && numBytes < MODBUS_RTU_MASTER_BUF_SIZE);
-      while (micros() - startTime < _frameTimeout);
-      if (_serial->available() || _buf[0] != id || (_buf[1] != functionCode && _buf[1] != (functionCode + 128)) || _crc(numBytes - 2) != _bytesToWord(_buf[numBytes - 1], _buf[numBytes - 2])) return 0;
-      else if (_buf[1] == (functionCode + 128)) {
-        _exceptionResponse = _buf[2];
-        return 0;
-      }
-      else return (numBytes - 2);
+  while (!_serial->available()) {
+    if (millis() - startTime >= _responseTimeout) {
+      _timeoutFlag = true;
+      return 0;
     }
   }
-  _timeoutFlag = true;
-  return 0;
+  do {
+    if (_serial->available()) {
+      startTime = micros();
+      _buf[numBytes] = _serial->read();
+      numBytes++;
+    }
+  } while (micros() - startTime <= _charTimeout && numBytes < MODBUS_RTU_MASTER_BUF_SIZE);
+  while (micros() - startTime < _frameTimeout);
+  if (_serial->available() || _buf[0] != id || (_buf[1] != functionCode && _buf[1] != (functionCode + 128)) || _crc(numBytes - 2) != _bytesToWord(_buf[numBytes - 1], _buf[numBytes - 2])) return 0;
+  else if (_buf[1] == (functionCode + 128)) {
+    _exceptionResponse = _buf[2];
+    return 0;
+  }
+  return (numBytes - 2);
 }
 
 void ModbusRTUMaster::_clearRxBuffer() {
