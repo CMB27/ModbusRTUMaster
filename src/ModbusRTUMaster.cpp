@@ -313,7 +313,7 @@ void ModbusRTUMaster::_calculateTimeouts(unsigned long baud, uint8_t config) {
 
 uint16_t ModbusRTUMaster::_crc(uint8_t len) {
   uint16_t value = 0xFFFF;
-  for (size_t i = 0; i < len; i++) {
+  for (uint8_t i = 0; i < len; i++) {
     value ^= (uint16_t)_buf[i];
     for (uint8_t j = 0; j < 8; j++) {
       bool lsb = value & 1;
