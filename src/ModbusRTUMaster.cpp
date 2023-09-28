@@ -80,11 +80,8 @@ bool ModbusRTUMaster::readCoils(uint8_t id, uint16_t startAddress, bool *buf, ui
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
-  else {
-    for (uint16_t i = 0; i < quantity; i++) {
-      buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
-    }
-    return quantity;
+  for (uint16_t i = 0; i < quantity; i++) {
+    buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
   }
   return true;
 }
@@ -102,11 +99,8 @@ bool ModbusRTUMaster::readDiscreteInputs(uint8_t id, uint16_t startAddress, bool
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
-  else {
-    for (uint16_t i = 0; i < quantity; i++) {
-      buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
-    }
-    return quantity;
+  for (uint16_t i = 0; i < quantity; i++) {
+    buf[i] = bitRead(_buf[3 + (i >> 3)], i & 7);
   }
   return true;
 }
@@ -124,12 +118,10 @@ bool ModbusRTUMaster::readHoldingRegisters(uint8_t id, uint16_t startAddress, ui
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
-  else {
-    for (uint16_t i = 0; i < quantity; i++) {
-      buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
-    }
-    return true;
+  for (uint16_t i = 0; i < quantity; i++) {
+    buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
   }
+  return true;
 }
 
 bool ModbusRTUMaster::readInputRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity) {
@@ -145,12 +137,10 @@ bool ModbusRTUMaster::readInputRegisters(uint8_t id, uint16_t startAddress, uint
   _writeRequest(6);
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != (uint16_t)(3 + byteCount) || _buf[2] != byteCount) return false;
-  else {
-    for (uint16_t i = 0; i < quantity; i++) {
-      buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
-    }
-    return true;
+  for (uint16_t i = 0; i < quantity; i++) {
+    buf[i] = _bytesToWord(_buf[3 + (i * 2)], _buf[4 + (i * 2)]);
   }
+  return true;
 }
 
 bool ModbusRTUMaster::writeSingleCoil(uint8_t id, uint16_t address, bool value) {
@@ -166,7 +156,7 @@ bool ModbusRTUMaster::writeSingleCoil(uint8_t id, uint16_t address, bool value) 
   if (id == 0) return true;
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != address || _buf[4] != (value * 255) || _buf[5] != 0) return false;
-  else return true;
+  return true;
 }
 
 bool ModbusRTUMaster::writeSingleHoldingRegister(uint8_t id, uint16_t address, uint16_t value) {
@@ -182,7 +172,7 @@ bool ModbusRTUMaster::writeSingleHoldingRegister(uint8_t id, uint16_t address, u
   if (id == 0) return true;
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != address || _bytesToWord(_buf[4], _buf[5]) != value) return false;
-  else return true;
+  return true;
 }
 
 bool ModbusRTUMaster::writeMultipleCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity) {
@@ -206,7 +196,7 @@ bool ModbusRTUMaster::writeMultipleCoils(uint8_t id, uint16_t startAddress, bool
   if (id == 0) return true;
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != startAddress || _bytesToWord(_buf[4], _buf[5]) != quantity) return false;
-  else return true;
+  return true;
 }
 
 bool ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity) {
@@ -228,7 +218,7 @@ bool ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, uint16_t startAd
   if (id == 0) return true;
   uint16_t responseLength = _readResponse(id, functionCode);
   if (responseLength != 6 || _bytesToWord(_buf[2], _buf[3]) != startAddress || _bytesToWord(_buf[4], _buf[5]) != quantity) return false;
-  else return true;
+  return true;
 }
 
 bool ModbusRTUMaster::getTimeoutFlag() {
