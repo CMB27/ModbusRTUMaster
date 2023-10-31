@@ -19,7 +19,7 @@ class ModbusRTUMaster {
     ModbusRTUMaster(Serial_& serial, uint8_t dePin = NO_DE_PIN);
     #endif
     void setTimeout(uint32_t timeout);
-    void begin(uint32_t baud, uint8_t config = SERIAL_8N1);
+    void begin(uint32_t baud, uint16_t config = SERIAL_8N1);
     bool readCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity);
     bool readDiscreteInputs(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity);
     bool readHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity);
@@ -54,7 +54,7 @@ class ModbusRTUMaster {
     uint16_t _readResponse(uint8_t id, uint8_t function);
     void _clearRxBuffer();
 
-    void _calculateTimeouts(uint32_t baud, uint8_t config);
+    void _calculateTimeouts(uint32_t baud, uint16_t config);
     uint16_t _crc(uint8_t len);
     uint16_t _div8RndUp(uint16_t value);
     uint16_t _bytesToWord(uint8_t high, uint8_t low);

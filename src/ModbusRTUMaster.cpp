@@ -40,7 +40,8 @@ void ModbusRTUMaster::setTimeout(uint32_t timeout) {
   _responseTimeout = timeout;
 }
 
-void ModbusRTUMaster::begin(uint32_t baud, uint8_t config) {
+void ModbusRTUMaster::begin(uint32_t baud, uint16_t config) {
+  if (config != SERIAL_8N1 && config != SERIAL_8E1 && config != SERIAL_8O1 && config != SERIAL_8N2 && config != SERIAL_8E2 && config != SERIAL_8O2) config = SERIAL_8N1;
   if (_hardwareSerial) {
     _calculateTimeouts(baud, config);
     _hardwareSerial->begin(baud, config);
@@ -286,7 +287,7 @@ void ModbusRTUMaster::_clearRxBuffer() {
 
 
 
-void ModbusRTUMaster::_calculateTimeouts(uint32_t baud, uint8_t config) {
+void ModbusRTUMaster::_calculateTimeouts(uint32_t baud, uint16_t config) {
   uint32_t bitsPerChar;
   if (config == SERIAL_8E2 || config == SERIAL_8O2) bitsPerChar = 12;
   else if (config == SERIAL_8N2 || config == SERIAL_8E1 || config == SERIAL_8O1) bitsPerChar = 11;
