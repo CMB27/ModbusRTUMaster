@@ -12,7 +12,7 @@
   - A LED from pin 7 to GND with a 330 ohm series resistor
   - A LED from pin 8 to GND with a 330 ohm series resistor
   - The center pin of a potentiometer to pin A0, and the outside pins of the potentiometer to 5V and GND
-  - The center pin of a potentiometer to pin A0, and the outside pins of the potentiometer to 5V and GND
+  - The center pin of a potentiometer to pin A1, and the outside pins of the potentiometer to 5V and GND
   
   !!! If your board's logic voltage is 3.3V, use 3.3V instead of 5V; if in doubt use the IOREF pin !!!
   
@@ -28,15 +28,17 @@
   By: C. M. Bulliner
   Modified: 2023-07-29
   By: C. M. Bulliner
+  Modified: 2023-11-11
+  By: C. M. Bulliner
   
 */
 
 #include <SoftwareSerial.h>
 #include <ModbusRTUMaster.h>
 
-const byte ledPins[4] = {8, 7, 6, 5};
-const byte buttonPins[2] = {3, 2};
-const byte potPins[2] = {A0, A1};
+const uint8_t ledPins[4] = {8, 7, 6, 5};
+const uint8_t buttonPins[2] = {3, 2};
+const uint8_t potPins[2] = {A0, A1};
 
 const uint8_t rxPin = 10;
 const uint8_t txPin = 11;
