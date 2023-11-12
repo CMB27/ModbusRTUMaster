@@ -65,10 +65,11 @@ Optionally it also sets the data configuration. Note, there must be 8 data bits 
 ``` C++
 modbus.begin(baud)
 modbus.begin(baud, config)
+modbus.begin(baud, config, rxPin, txPin, invert) // ESP32 only
 ```
 
 #### Parameters
-- `baud`: the baud rate to use for Modbus communication. Common values are: `1200`, `2400`, `4800`, `9600`, `16200`, `38400`, `57600`, and `115200`. Allowed data types: `uint32_t`.
+- `baud`: the baud rate to use for Modbus communication. Common values are: `1200`, `2400`, `4800`, `9600`, `16200`, `38400`, `57600`, and `115200`. Allowed data types: `unsigned long`.
 - `config`: the serial port configuration to use. Valid values are:  
 `SERIAL_8N1`: no parity (default)  
 `SERIAL_8N2`  
@@ -76,8 +77,12 @@ modbus.begin(baud, config)
 `SERIAL_8E2`  
 `SERIAL_8O1`: odd parity  
 `SERIAL_8O2`
+- `rxPin`: the pin on which to receive serial data. Allowed data types: `int8_t`, `char`.
+- `txPin`: the pin on which to transmit serial data. Allowed data types: `int8_t`, `char`.
+- `invert`: will invert RX/TX polarity. Allowed data types: `bool`.
 
-_If using a SoftwareSerial port a configuration of `SERIAL_8N1` will be used regardless of what is entered._
+_If using a SoftwareSerial port a configuration of `SERIAL_8N1` will be used regardless of what is entered._  
+_The `rxPin`, `txPin`, and `invert` parameters are only available on ESP32 boards._
 
 ---
 
