@@ -40,7 +40,27 @@ void ModbusRTUMaster::setTimeout(uint32_t timeout) {
   _responseTimeout = timeout;
 }
 
-void ModbusRTUMaster::begin(uint32_t baud, uint16_t config) {
+#ifdef ESP32
+void ModbusRTUMaster::begin(unsigned long baud, uint32_t config, int8_t rxPin, int8_t txPin, bool invert) {
+  if (_hardwareSerial) {
+    _calculateTimeouts(baud, config);
+    _hardwareSerial->begin(baud, config, rxPin, txPin, invert);
+  }
+  #ifdef HAVE_CDCSERIAL
+  else if (_usbSerial) {
+    _calculateTimeouts(baud, config);
+    _usbSerial->begin(baud, config);
+    while (!_usbSerial);
+  }
+  #endif
+  if (_dePin != NO_DE_PIN) {
+    pinMode(_dePin, OUTPUT);
+    digitalWrite(_dePin, LOW);
+  }
+  _clearRxBuffer();
+}
+#else
+void ModbusRTUMaster::begin(unsigned long baud, uint32_t config) {
   if (config != SERIAL_8N1 && config != SERIAL_8E1 && config != SERIAL_8O1 && config != SERIAL_8N2 && config != SERIAL_8E2 && config != SERIAL_8O2) config = SERIAL_8N1;
   if (_hardwareSerial) {
     _calculateTimeouts(baud, config);
@@ -65,7 +85,7 @@ void ModbusRTUMaster::begin(uint32_t baud, uint16_t config) {
   }
   _clearRxBuffer();
 }
-
+#endif
 
 
 bool ModbusRTUMaster::readCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity) {
@@ -287,7 +307,7 @@ void ModbusRTUMaster::_clearRxBuffer() {
 
 
 
-void ModbusRTUMaster::_calculateTimeouts(uint32_t baud, uint16_t config) {
+void ModbusRTUMaster::_calculateTimeouts(unsigned long baud, uint32_t config) {
   uint32_t bitsPerChar;
   if (config == SERIAL_8E2 || config == SERIAL_8O2) bitsPerChar = 12;
   else if (config == SERIAL_8N2 || config == SERIAL_8E1 || config == SERIAL_8O1) bitsPerChar = 11;
