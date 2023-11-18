@@ -271,7 +271,7 @@ void ModbusRTUMaster::_writeRequest(uint8_t len) {
 }
 
 uint16_t ModbusRTUMaster::_readResponse(uint8_t id, uint8_t functionCode) {
-  uint32_t startTime = millis();
+  unsigned long startTime = millis();
   uint16_t numBytes = 0;
   while (!_serial->available()) {
     if (millis() - startTime >= _responseTimeout) {
