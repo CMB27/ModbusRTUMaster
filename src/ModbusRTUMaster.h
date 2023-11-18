@@ -18,7 +18,7 @@ class ModbusRTUMaster {
     #ifdef HAVE_CDCSERIAL
     ModbusRTUMaster(Serial_& serial, uint8_t dePin = NO_DE_PIN);
     #endif
-    void setTimeout(uint32_t timeout);
+    void setTimeout(unsigned long timeout);
     #ifdef ESP32
     void begin(unsigned long baud, uint32_t config = SERIAL_8N1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false);
     #else
@@ -48,9 +48,9 @@ class ModbusRTUMaster {
     Stream *_serial;
     uint8_t _dePin;
     uint8_t _buf[MODBUS_RTU_MASTER_BUF_SIZE];
-    uint32_t _charTimeout;
-    uint32_t _frameTimeout;
-    uint32_t _responseTimeout = 100;
+    unsigned long _charTimeout;
+    unsigned long _frameTimeout;
+    unsigned long _responseTimeout = 100;
     bool _timeoutFlag = false;
     uint8_t _exceptionResponse = 0;
     

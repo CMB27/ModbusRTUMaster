@@ -36,7 +36,7 @@ ModbusRTUMaster::ModbusRTUMaster(Serial_& serial, uint8_t dePin) {
 }
 #endif
 
-void ModbusRTUMaster::setTimeout(uint32_t timeout) {
+void ModbusRTUMaster::setTimeout(unsigned long timeout) {
   _responseTimeout = timeout;
 }
 
@@ -308,7 +308,7 @@ void ModbusRTUMaster::_clearRxBuffer() {
 
 
 void ModbusRTUMaster::_calculateTimeouts(unsigned long baud, uint32_t config) {
-  uint32_t bitsPerChar;
+  unsigned long bitsPerChar;
   if (config == SERIAL_8E2 || config == SERIAL_8O2) bitsPerChar = 12;
   else if (config == SERIAL_8N2 || config == SERIAL_8E1 || config == SERIAL_8O1) bitsPerChar = 11;
   else bitsPerChar = 10;
