@@ -50,7 +50,7 @@ modbus.setTimeout(time)
 ```
 
 #### Parameters
-- `time`: the timeout duration in milliseconds. Allowed data types: `uint32_t`.
+- `time`: the timeout duration in milliseconds. Allowed data types: `unsigned long`.
 
 ---
 
