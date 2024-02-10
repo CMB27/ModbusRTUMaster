@@ -69,7 +69,7 @@ modbus.begin(baud, config, rxPin, txPin, invert) // ESP32 only
 ```
 
 #### Parameters
-- `baud`: the baud rate to use for Modbus communication. Common values are: `1200`, `2400`, `4800`, `9600`, `16200`, `38400`, `57600`, and `115200`. Allowed data types: `unsigned long`.
+- `baud`: the baud rate to use for Modbus communication. Common values are: `1200`, `2400`, `4800`, `9600`, `19200`, `38400`, `57600`, and `115200`. Allowed data types: `unsigned long`.
 - `config`: the serial port configuration to use. Valid values are:  
 `SERIAL_8N1`: no parity (default)  
 `SERIAL_8N2`  
