@@ -11,7 +11,12 @@
 
 class ModbusRTUMaster {
   public:
+    #ifdef __SAM3X8E__
+    ModbusRTUMaster(UARTClass& serial, uint8_t dePin = NO_DE_PIN);
+    ModbusRTUMaster(USARTClass& serial, uint8_t dePin = NO_DE_PIN);
+    #else
     ModbusRTUMaster(HardwareSerial& serial, uint8_t dePin = NO_DE_PIN);
+    #endif
     #ifdef __AVR__
     ModbusRTUMaster(SoftwareSerial& serial, uint8_t dePin = NO_DE_PIN);
     #endif
@@ -38,7 +43,12 @@ class ModbusRTUMaster {
     void clearExceptionResponse();
 
   private:
+    #ifdef __SAM3X8E__
+    UARTClass *_uartSerial;
+    USARTClass *_usartSerial;
+    #else
     HardwareSerial *_hardwareSerial;
+    #endif
     #ifdef __AVR__
     SoftwareSerial *_softwareSerial;
     #endif

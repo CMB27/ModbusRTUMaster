@@ -1,5 +1,29 @@
 #include "ModbusRTUMaster.h"
 
+#ifdef __SAM3X8E__
+ModbusRTUMaster::ModbusRTUMaster(UARTClass& serial, uint8_t dePin) {
+  _uartSerial = &serial;
+  #ifdef __AVR__
+  _softwareSerial = 0;
+  #endif
+  #ifdef HAVE_CDCSERIAL
+  _usbSerial = 0;
+  #endif
+  _serial = &serial;
+  _dePin = dePin;
+}
+ModbusRTUMaster::ModbusRTUMaster(USARTClass& serial, uint8_t dePin) {
+  _usartSerial = &serial;
+  #ifdef __AVR__
+  _softwareSerial = 0;
+  #endif
+  #ifdef HAVE_CDCSERIAL
+  _usbSerial = 0;
+  #endif
+  _serial = &serial;
+  _dePin = dePin;
+}
+#else
 ModbusRTUMaster::ModbusRTUMaster(HardwareSerial& serial, uint8_t dePin) {
   _hardwareSerial = &serial;
   #ifdef __AVR__
@@ -11,6 +35,7 @@ ModbusRTUMaster::ModbusRTUMaster(HardwareSerial& serial, uint8_t dePin) {
   _serial = &serial;
   _dePin = dePin;
 }
+#endif
 
 #ifdef __AVR__
 ModbusRTUMaster::ModbusRTUMaster(SoftwareSerial& serial, uint8_t dePin) {
@@ -61,11 +86,53 @@ void ModbusRTUMaster::begin(unsigned long baud, uint32_t config, int8_t rxPin, i
 }
 #else
 void ModbusRTUMaster::begin(unsigned long baud, uint32_t config) {
+  #ifdef __SAM3X8E__
+  if (_uartSerial) {
+    if (config != SERIAL_8N1 && config != SERIAL_8E1 && config != SERIAL_8O1) config = SERIAL_8N1;
+      _calculateTimeouts(baud, config);
+    switch(config) {
+      case SERIAL_8N1:
+        _uartSerial->begin(baud, UARTClass::SERIAL_8N1);
+        break;
+      case SERIAL_8E1:
+        _uartSerial->begin(baud, UARTClass::SERIAL_8E1);
+        break;
+      case SERIAL_8O1:
+        _uartSerial->begin(baud, UARTClass::SERIAL_8O1);
+        break;
+    };
+  }
+  if (_usartSerial) {
+    if (config != SERIAL_8N1 && config != SERIAL_8E1 && config != SERIAL_8O1 && config != SERIAL_8N2 && config != SERIAL_8E2 && config != SERIAL_8O2) config = SERIAL_8N1;
+    _calculateTimeouts(baud, config);
+    switch(config) {
+      case SERIAL_8N1:
+        _usartSerial->begin(baud, UARTClass::SERIAL_8N1);
+        break;
+      case SERIAL_8E1:
+        _usartSerial->begin(baud, UARTClass::SERIAL_8E1);
+        break;
+      case SERIAL_8O1:
+        _usartSerial->begin(baud, UARTClass::SERIAL_8O1);
+        break;
+      case SERIAL_8N2:
+        _usartSerial->begin(baud, USARTClass::SERIAL_8N2);
+        break;
+      case SERIAL_8E2:
+        _usartSerial->begin(baud, USARTClass::SERIAL_8E2);
+        break;
+      case SERIAL_8O2:
+        _usartSerial->begin(baud, USARTClass::SERIAL_8O2);
+        break;
+    };
+  }
+  #else
   if (config != SERIAL_8N1 && config != SERIAL_8E1 && config != SERIAL_8O1 && config != SERIAL_8N2 && config != SERIAL_8E2 && config != SERIAL_8O2) config = SERIAL_8N1;
   if (_hardwareSerial) {
     _calculateTimeouts(baud, config);
     _hardwareSerial->begin(baud, config);
   }
+  #endif
   #ifdef __AVR__
   else if (_softwareSerial) {
     _calculateTimeouts(baud, SERIAL_8N1);
