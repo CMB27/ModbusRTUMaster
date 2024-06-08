@@ -6,8 +6,8 @@ This is an Arduino library that implements the master/client logic of the Modbus
 This library will work with HardwareSerial, SoftwareSerial, or Serial_ (USB Serial on ATmega32u4 based boards). A driver enable pin can be set up, enabling an RS-485 transceiver to be used. Only `SERIAL_8N1`, `SERIAL_8E1`, `SERIAL_8O1`, `SERIAL_8N2`, `SERIAL_8E2`, and `SERIAL_8O2` are supported when using HardwareSerial; attempting to use any other configuration will cause the library to default to `SERIAL_8N1`.  
 
 ## Examples
-- [ModbusRTUMasterExample](https://github.com/CMB27/ModbusRTUMaster/blob/main/extras/ModbusRTUMasterExample.md)
-- [ModbusRTUMasterProbe](https://github.com/CMB27/ModbusRTUMaster/blob/main/extras/ModbusRTUMasterProbe.md)
+- [ModbusRTUMasterExample](https://github.com/CMB27/ModbusRTUMaster/blob/main/examples/ModbusRTUMasterExample/ModbusRTUMasterExample.ino)
+- [ModbusRTUMasterProbe](https://github.com/CMB27/ModbusRTUMaster/blob/main/examples/ModbusRTUMasterProbe/ModbusRTUMasterProbe.ino)
 
 ## Methods
 
