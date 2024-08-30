@@ -82,6 +82,7 @@ void setup() {
   pinMode(ledPins[2], OUTPUT);
   pinMode(ledPins[3], OUTPUT);
   
+  Serial1.begin(38400);
   modbus.begin(38400);
 
   #if defined DEBUGGING_ENABLED

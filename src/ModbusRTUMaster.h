@@ -1,67 +1,62 @@
 #ifndef ModbusRTUMaster_h
 #define ModbusRTUMaster_h
 
-#define MODBUS_RTU_MASTER_BUF_SIZE 256
-#define NO_DE_PIN 255
-
 #include "Arduino.h"
-#ifdef __AVR__
-#include <SoftwareSerial.h>
-#endif
+#include "ModbusADU"
+#include "ModbusRTUComm"
+
+enum ModbusRTUMasterError uint8_t {
+  MODBUS_RTU_MASTER_SUCCESS = 0,
+  MODBUS_RTU_MASTER_INVALID_ID = 1,
+  MODBUS_RTU_MASTER_INVALID_BUFFER = 2,
+  MODBUS_RTU_MASTER_INVALID_QUANTITY = 3,
+  MODBUS_RTU_MASTER_RESPONSE_TIMEOUT = 4,
+  MODBUS_RTU_MASTER_FRAME_ERROR = 5,
+  MODBUS_RTU_MASTER_CRC_ERROR = 6,
+  MODBUS_RTU_MASTER_UNKNOWN_COMM_ERROR = 7,
+  MODBUS_RTU_MASTER_UNEXPECTED_ID = 8,
+  MODBUS_RTU_MASTER_EXCEPTION_RESPONSE = 9,
+  MODBUS_RTU_MASTER_UNEXPECTED_FUNCTION_CODE = 10,
+  MODBUS_RTU_MASTER_UNEXPECTED_RESPONSE_LENGTH = 11,
+  MODBUS_RTU_MASTER_UNEXPECTED_BYTE_COUNT = 12,
+  MODBUS_RTU_MASTER_UNEXPECTED_ADDRESS = 13,
+  MODBUS_RTU_MASTER_UNEXPECTED_VALUE = 14,
+  MODBUS_RTU_MASTER_UNEXPECTED_QUANTITY = 15
+};
 
 class ModbusRTUMaster {
   public:
-    ModbusRTUMaster(HardwareSerial& serial, uint8_t dePin = NO_DE_PIN);
-    #ifdef __AVR__
-    ModbusRTUMaster(SoftwareSerial& serial, uint8_t dePin = NO_DE_PIN);
-    #endif
-    #ifdef HAVE_CDCSERIAL
-    ModbusRTUMaster(Serial_& serial, uint8_t dePin = NO_DE_PIN);
-    #endif
+    ModbusRTUMaster(Stream& serial, int8_t dePin = -1, int8_t rePin = -1, unsigned long timeout = 500);
     void setTimeout(unsigned long timeout);
-    #ifdef ESP32
-    void begin(unsigned long baud, uint32_t config = SERIAL_8N1, int8_t rxPin = -1, int8_t txPin = -1, bool invert = false);
-    #else
-    void begin(unsigned long baud, uint32_t config = SERIAL_8N1);
-    #endif
-    bool readCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity);
-    bool readDiscreteInputs(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity);
-    bool readHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity);
-    bool readInputRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity);
-    bool writeSingleCoil(uint8_t id, uint16_t address, bool value);
-    bool writeSingleHoldingRegister(uint8_t id, uint16_t address, uint16_t value);
-    bool writeMultipleCoils(uint8_t id, uint16_t startAddress, bool *buf, uint16_t quantity);
-    bool writeMultipleHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t *buf, uint16_t quantity);
-    bool getTimeoutFlag();
-    void clearTimeoutFlag();
+    template <typename ConfigType>
+    void begin(unsigned long baud, ConfigType config = SERIAL_8N1, unsigned long preDelay, unsigned long postDelay);
+
+    ModbusRTUMasterError readCoils(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
+    ModbusRTUMasterError readDiscreteInputs(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
+    ModbusRTUMasterError readHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t buf[], uint16_t quantity);
+    ModbusRTUMasterError readInputRegisters(uint8_t id, uint16_t startAddress, uint16_t buf[], uint16_t quantity);
+
+    ModbusRTUMasterError writeSingleCoil(uint8_t id, uint16_t address, bool value);
+    ModbusRTUMasterError writeSingleHoldingRegister(uint8_t id, uint16_t address, uint16_t value);
+    ModbusRTUMasterError writeMultipleCoils(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
+    ModbusRTUMasterError writeMultipleHoldingRegisters(uint8_t id, uint16_t startAddress, uint16_t buf[], uint16_t quantity);
+
     uint8_t getExceptionResponse();
-    void clearExceptionResponse();
 
   private:
-    HardwareSerial *_hardwareSerial;
-    #ifdef __AVR__
-    SoftwareSerial *_softwareSerial;
-    #endif
-    #ifdef HAVE_CDCSERIAL
-    Serial_ *_usbSerial;
-    #endif
-    Stream *_serial;
-    uint8_t _dePin;
-    uint8_t _buf[MODBUS_RTU_MASTER_BUF_SIZE];
-    unsigned long _charTimeout;
-    unsigned long _frameTimeout;
-    unsigned long _responseTimeout = 100;
-    bool _timeoutFlag = false;
+    ModbusRTUComm _rtuComm;
     uint8_t _exceptionResponse = 0;
-    
-    void _writeRequest(uint8_t len);
-    uint16_t _readResponse(uint8_t id, uint8_t function);
-    void _clearRxBuffer();
 
-    void _calculateTimeouts(unsigned long baud, uint32_t config);
-    uint16_t _crc(uint8_t len);
+    template <typename DataType>
+    ModbusRTUMasterError _readValues(uint8_t id, uint8_t functionCode, uint16_t startAddress, DataType buf[], uint16_t quantity);
+    ModbusRTUMasterError _writeSingleValue(uint8_t id, uint8_t functionCode, uint16_t address, uint16_t value);
+    template <typename DataType>
+    ModbusRTUMasterError _writeMultipleValues(uint8_t id, uint8_t functionCode, uint16_t startAddress, DataType buf[], uint16_t quantity);
+
+    ModbusRTUMasterError _translateCommError(ModbusRTUCommError commError);
     uint16_t _div8RndUp(uint16_t value);
-    uint16_t _bytesToWord(uint8_t high, uint8_t low);
+
+    
 };
 
 #endif
