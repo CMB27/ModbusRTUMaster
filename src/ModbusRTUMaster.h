@@ -2,10 +2,10 @@
 #define ModbusRTUMaster_h
 
 #include "Arduino.h"
-#include "ModbusADU"
-#include "ModbusRTUComm"
+#include "ModbusADU.h"
+#include "ModbusRTUComm.h"
 
-enum ModbusRTUMasterError uint8_t {
+enum ModbusRTUMasterError : uint8_t {
   MODBUS_RTU_MASTER_SUCCESS = 0,
   MODBUS_RTU_MASTER_INVALID_ID = 1,
   MODBUS_RTU_MASTER_INVALID_BUFFER = 2,
@@ -17,7 +17,7 @@ enum ModbusRTUMasterError uint8_t {
   MODBUS_RTU_MASTER_UNEXPECTED_ID = 8,
   MODBUS_RTU_MASTER_EXCEPTION_RESPONSE = 9,
   MODBUS_RTU_MASTER_UNEXPECTED_FUNCTION_CODE = 10,
-  MODBUS_RTU_MASTER_UNEXPECTED_RESPONSE_LENGTH = 11,
+  MODBUS_RTU_MASTER_UNEXPECTED_LENGTH = 11,
   MODBUS_RTU_MASTER_UNEXPECTED_BYTE_COUNT = 12,
   MODBUS_RTU_MASTER_UNEXPECTED_ADDRESS = 13,
   MODBUS_RTU_MASTER_UNEXPECTED_VALUE = 14,
@@ -28,8 +28,7 @@ class ModbusRTUMaster {
   public:
     ModbusRTUMaster(Stream& serial, int8_t dePin = -1, int8_t rePin = -1, unsigned long timeout = 500);
     void setTimeout(unsigned long timeout);
-    template <typename ConfigType>
-    void begin(unsigned long baud, ConfigType config = SERIAL_8N1, unsigned long preDelay, unsigned long postDelay);
+    void begin(unsigned long baud, uint32_t config = SERIAL_8N1, unsigned long preDelay = 0, unsigned long postDelay = 0);
 
     ModbusRTUMasterError readCoils(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
     ModbusRTUMasterError readDiscreteInputs(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
@@ -47,11 +46,9 @@ class ModbusRTUMaster {
     ModbusRTUComm _rtuComm;
     uint8_t _exceptionResponse = 0;
 
-    template <typename DataType>
-    ModbusRTUMasterError _readValues(uint8_t id, uint8_t functionCode, uint16_t startAddress, DataType buf[], uint16_t quantity);
+    ModbusRTUMasterError _readValues(uint8_t id, uint8_t functionCode, uint16_t startAddress, bool buf[], uint16_t quantity);
+    ModbusRTUMasterError _readValues(uint8_t id, uint8_t functionCode, uint16_t startAddress, uint16_t buf[], uint16_t quantity);
     ModbusRTUMasterError _writeSingleValue(uint8_t id, uint8_t functionCode, uint16_t address, uint16_t value);
-    template <typename DataType>
-    ModbusRTUMasterError _writeMultipleValues(uint8_t id, uint8_t functionCode, uint16_t startAddress, DataType buf[], uint16_t quantity);
 
     ModbusRTUMasterError _translateCommError(ModbusRTUCommError commError);
     uint16_t _div8RndUp(uint16_t value);
