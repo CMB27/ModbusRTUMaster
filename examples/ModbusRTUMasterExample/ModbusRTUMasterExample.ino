@@ -64,15 +64,50 @@ const unsigned long postDelay = 0;
 SoftwareSerial mySerial(rxPin, txPin);
 ModbusRTUMaster modbus(mySerial, dePin, rePin);
 
-bool coils[2];
-bool discreteInputs[2];
-uint16_t holdingRegisters[2];
-uint16_t inputRegisters[2];
+const uint8_t numCoils = 2;
+const uint8_t numDiscreteInputs = 2;
+const uint8_t numHoldingRegisters = 2;
+const uint8_t numInputRegisters = 2;
 
-uint8_t unitId = 1;
-uint16_t startingAddress = 0;
-uint16_t quantity = 2;
-uint8_t error;
+bool coils[numCoils];
+bool discreteInputs[numDiscreteInputs];
+uint16_t holdingRegisters[numHoldingRegisters];
+uint16_t inputRegisters[numInputRegisters];
+
+
+
+void printTableHeader() {
+  Serial.println("| Unit ID | Function Code                         | Starting Address | Quantity | Status/Error               |");
+}
+
+void printTableSeperator() {
+  Serial.println("+---------+---------------------------------------+------------------+----------+----------------------------+");
+}
+
+void printParameters(uint8_t unitId, const char* functionString, uint16_t startingAddress, uint16_t quantity) {
+  char string[64];
+  sprintf(string, "| %7d ", unitId);
+  Serial.print(string);
+  sprintf(string, "| %-37s ", functionString);
+  Serial.print(string);
+  sprintf(string, "| %16d ", startingAddress);
+  Serial.print(string);
+  sprintf(string, "| %8d ", quantity);
+  Serial.print(string);
+}
+
+void printError(uint8_t error) {
+  char string[64];
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) {
+    sprintf(string, "| exception response: %02X     |\n", modbus.getExceptionResponse());
+  }
+  else {
+    sprintf(string, "| %-26s |\n", errorString[error]);
+  }
+  Serial.print(string);
+}
+
+
 
 void setup() {
   pinMode(knobPins[0], INPUT);
@@ -96,25 +131,28 @@ void loop() {
   coils[0] = !digitalRead(buttonPins[0]);
   coils[1] = !digitalRead(buttonPins[1]);
 
-  Serial.println("writing multiple holding registers");
-  error = modbus.writeMultipleHoldingRegisters(unitId, startingAddress, holdingRegisters, quantity);
-  if (error) Serial.println(errorString[error]);
-  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+  printTableSeperator();
+  printTableHeader();
+  printTableSeperator();
 
-  Serial.println("writing multiple coils");
-  error = modbus.writeMultipleCoils(1, 0, coils, 2);
-  if (error) Serial.println(errorString[error]);
-  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+  uint8_t unitId = 1;
+  uint16_t startingAddress[4] = {0, 0, 0, 0};
 
-  Serial.println("reading multiple input registers");
-  error = modbus.readInputRegisters(1, 0, inputRegisters, 2);
-  if (error) Serial.println(errorString[error]);
-  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+  printParameters(unitId, "16 - write multiple holding registers", startingAddress[0], numHoldingRegisters);
+  printError(modbus.writeMultipleHoldingRegisters(unitId, startingAddress[0], holdingRegisters, numHoldingRegisters));
 
-  Serial.println("reading discrete inputs");
-  error = modbus.readDiscreteInputs(1, 0, discreteInputs, 2);
-  if (error) Serial.println(errorString[error]);
-  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+  printParameters(unitId, "15 - write multiple coils", startingAddress[1], numCoils);
+  printError(modbus.writeMultipleCoils(unitId, startingAddress[1], coils, numCoils));
+
+  printParameters(unitId, " 4 - read input registers", startingAddress[2], numInputRegisters);
+  printError(modbus.readInputRegisters(unitId, startingAddress[2], inputRegisters, numInputRegisters));
+
+  printParameters(unitId, " 2 - read discrete inputs", startingAddress[3], numDiscreteInputs);
+  printError(modbus.readDiscreteInputs(unitId, startingAddress[3], discreteInputs, numDiscreteInputs));
+
+  printTableSeperator();
+  Serial.println();
+  Serial.println();
   
   analogWrite(ledPins[0], inputRegisters[0]);
   analogWrite(ledPins[1], inputRegisters[1]);
