@@ -61,6 +61,7 @@ ModbusRTUMasterError ModbusRTUMaster::writeMultipleCoils(uint8_t id, uint16_t st
     bitClear(adu.data[5 + (i / 8)], i % 8);
   }
   adu.setDataLen(5 + byteCount);
+  _rtuComm.writeAdu(adu);
   if (id == 0) return MODBUS_RTU_MASTER_SUCCESS;
   ModbusRTUCommError commError = _rtuComm.readAdu(adu);
   if (commError) return _translateCommError(commError);
@@ -92,6 +93,7 @@ ModbusRTUMasterError ModbusRTUMaster::writeMultipleHoldingRegisters(uint8_t id, 
     adu.setDataRegister(5 + (i * 2), buf[i]);
   }
   adu.setDataLen(5 + byteCount);
+  _rtuComm.writeAdu(adu);
   if (id == 0) return MODBUS_RTU_MASTER_SUCCESS;
   ModbusRTUCommError commError = _rtuComm.readAdu(adu);
   if (commError) return _translateCommError(commError);
