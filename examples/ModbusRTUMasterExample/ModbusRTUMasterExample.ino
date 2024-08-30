@@ -23,58 +23,60 @@
   
   Created: 2023-07-22
   By: C. M. Bulliner
-  Last Modified: 2024-02-29
+  Last Modified: 2024-08-29
   By: C. M. Bulliner
   
 */
 
-#if __AVR__
-  // Uncomment the following line if you want to use SoftwareSerial on pins 10 and ll; note this only works on AVR boards.
-  //# define USE_SOFTWARE_SERIAL
-#endif
-
-// Comment out the following line if you want to disable debugging; note debugging is automatically disabled on the Arduino UNO and Arduino Mega when not using softwareSerial
-#define DEBUGGING_ENABLED
-
-#if defined USE_SOFTWARE_SERIAL
-  #include <SoftwareSerial.h>
-#endif
-
 #include <ModbusRTUMaster.h>
+#include <SoftwareSerial.h>
 
-const byte potPins[2] = {A0, A1};
-const byte buttonPins[2] = {2, 3};
-const byte ledPins[4] = {5, 6, 7, 8};
-const byte dePin = 13;
+const char* errorString[] = {
+  "success",
+  "invalid id",
+  "invalid buffer",
+  "invalid quantity",
+  "response timeout",
+  "frame error",
+  "crc error",
+  "unknown comm error",
+  "unexpected id",
+  "exception response",
+  "unexpected function code",
+  "unexpected response length",
+  "unexpected byte count",
+  "unexpected address",
+  "unexpected value",
+  "unexpected quantity"
+};
 
-#if defined USE_SOFTWARE_SERIAL
-  const byte rxPin = 10;
-  const byte txPin = 11;
-  SoftwareSerial mySerial(rxPin, txPin);
-  ModbusRTUMaster modbus(mySerial, dePin); // serial port, driver enable pin for rs-485
-#else
-  #if (defined __AVR_ATmega328P__ || defined __AVR_ATmega168__ || defined __AVR_ATmega1280__ || defined __AVR_ATmega2560__)
-    ModbusRTUMaster modbus(Serial, dePin); // serial port, driver enable pin for rs-485
-    #undef DEBUGGING_ENABLED
-  #elif defined ESP32
-    ModbusRTUMaster modbus(Serial0, dePin); // serial port, driver enable pin for rs-485
-  #else
-    ModbusRTUMaster modbus(Serial1, dePin); // serial port, driver enable pin for rs-485
-  #endif
-#endif
+const int8_t knobPins[2] = {A0, A1};
+const int8_t buttonPins[2] = {2, 3};
+const int8_t ledPins[4] = {5, 6, 7, 8};
+const int8_t dePin = 13;
+const int8_t rePin = -1;
+const int8_t rxPin = 10;
+const int8_t txPin = 11;
+
+const unsigned long preDelay = 0;
+const unsigned long postDelay = 0;
+
+SoftwareSerial mySerial(rxPin, txPin);
+ModbusRTUMaster modbus(mySerial, dePin, rePin);
 
 bool coils[2];
 bool discreteInputs[2];
 uint16_t holdingRegisters[2];
 uint16_t inputRegisters[2];
 
-void setup() {
-  #if defined ESP32
-    analogReadResolution(10);
-  #endif
+uint8_t unitId = 1;
+uint16_t startingAddress = 0;
+uint16_t quantity = 2;
+uint8_t error;
 
-  pinMode(potPins[0], INPUT);
-  pinMode(potPins[1], INPUT);
+void setup() {
+  pinMode(knobPins[0], INPUT);
+  pinMode(knobPins[1], INPUT);
   pinMode(buttonPins[0], INPUT_PULLUP);
   pinMode(buttonPins[1], INPUT_PULLUP);
   pinMode(ledPins[0], OUTPUT);
@@ -82,75 +84,40 @@ void setup() {
   pinMode(ledPins[2], OUTPUT);
   pinMode(ledPins[3], OUTPUT);
   
-  Serial1.begin(38400);
-  modbus.begin(38400);
+  Serial.begin(115200);
 
-  #if defined DEBUGGING_ENABLED
-    Serial.begin(115200);
-    while (!Serial);
-  #endif
+  mySerial.begin(38400);
+  modbus.begin(38400, SERIAL_8N1, 0, 0);
 }
 
 void loop() {
-  holdingRegisters[0] = map(analogRead(potPins[0]), 0, 1023, 0, 255);
-  holdingRegisters[1] = map(analogRead(potPins[1]), 0, 1023, 0, 255);
+  holdingRegisters[0] = map(analogRead(knobPins[0]), 0, 1023, 0, 255);
+  holdingRegisters[1] = map(analogRead(knobPins[1]), 0, 1023, 0, 255);
   coils[0] = !digitalRead(buttonPins[0]);
   coils[1] = !digitalRead(buttonPins[1]);
 
-  #if defined DEBUGGING_ENABLED
-    debug(modbus.writeMultipleHoldingRegisters(1, 0, holdingRegisters, 2)); // slave id, starting data address, unsigned 16 bit integer array of holding register values, number of holding registers to write
-    debug(modbus.writeMultipleCoils(1, 0, coils, 2));                       // slave id, starting data address, bool array of coil values, number of coils to write
-    debug(modbus.readInputRegisters(1, 0, inputRegisters, 2));              // slave id, starting data address, unsigned 16 bit integer array to place input register values, number of input registers to read
-    debug(modbus.readDiscreteInputs(1, 0, discreteInputs, 2));              // slave id, starting data address, bool array to place discrete input values, number of discrete inputs to read
-  #else
-    modbus.writeMultipleHoldingRegisters(1, 0, holdingRegisters, 2); // slave id, starting data address, unsigned 16 bit integer array of holding register values, number of holding registers to write
-    modbus.writeMultipleCoils(1, 0, coils, 2);                       // slave id, starting data address, bool array of coil values, number of coils to write
-    modbus.readInputRegisters(1, 0, inputRegisters, 2);              // slave id, starting data address, unsigned 16 bit integer array to place input register values, number of input registers to read
-    modbus.readDiscreteInputs(1, 0, discreteInputs, 2);              // slave id, starting data address, bool array to place discrete input values, number of discrete inputs to read
-  #endif
+  Serial.println("writing multiple holding registers");
+  error = modbus.writeMultipleHoldingRegisters(unitId, startingAddress, holdingRegisters, quantity);
+  if (error) Serial.println(errorString[error]);
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+
+  Serial.println("writing multiple coils");
+  error = modbus.writeMultipleCoils(1, 0, coils, 2);
+  if (error) Serial.println(errorString[error]);
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+
+  Serial.println("reading multiple input registers");
+  error = modbus.readInputRegisters(1, 0, inputRegisters, 2);
+  if (error) Serial.println(errorString[error]);
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
+
+  Serial.println("reading discrete inputs");
+  error = modbus.readDiscreteInputs(1, 0, discreteInputs, 2);
+  if (error) Serial.println(errorString[error]);
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) Serial.println(modbus.getExceptionResponse(), HEX);
   
   analogWrite(ledPins[0], inputRegisters[0]);
   analogWrite(ledPins[1], inputRegisters[1]);
   digitalWrite(ledPins[2], discreteInputs[0]);
   digitalWrite(ledPins[3], discreteInputs[1]);
 }
-
-# if defined DEBUGGING_ENABLED
-  bool debug(bool modbusRequest) {
-    if (modbusRequest == true) {
-      Serial.println("Success");
-    }
-    else {
-      Serial.print("Failure");
-      if (modbus.getTimeoutFlag() == true) {
-        Serial.print(": Timeout");
-        modbus.clearTimeoutFlag();
-      }
-      else if (modbus.getExceptionResponse() != 0) {
-        Serial.print(": Exception Response ");
-        Serial.print(modbus.getExceptionResponse());
-        switch (modbus.getExceptionResponse()) {
-          case 1:
-            Serial.print(" (Illegal Function)");
-            break;
-          case 2:
-            Serial.print(" (Illegal Data Address)");
-            break;
-          case 3:
-            Serial.print(" (Illegal Data Value)");
-            break;
-          case 4:
-            Serial.print(" (Server Device Failure)");
-            break;
-          default:
-            Serial.print(" (Uncommon Exception Response)");
-            break;
-        }
-        modbus.clearExceptionResponse();
-      }
-      Serial.println();
-    }
-    Serial.flush();
-    return modbusRequest;
-  }
-#endif
