@@ -53,7 +53,6 @@ class ModbusRTUMaster {
     ModbusRTUMasterError _translateCommError(ModbusRTUCommError commError);
     uint16_t _div8RndUp(uint16_t value);
 
-    
 };
 
 #endif
