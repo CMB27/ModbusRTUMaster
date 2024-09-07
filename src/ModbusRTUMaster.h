@@ -26,9 +26,9 @@ enum ModbusRTUMasterError : uint8_t {
 
 class ModbusRTUMaster {
   public:
-    ModbusRTUMaster(Stream& serial, int8_t dePin = -1, int8_t rePin = -1, unsigned long timeout = 500);
+    ModbusRTUMaster(Stream& serial, int8_t dePin = -1, int8_t rePin = -1);
     void setTimeout(unsigned long timeout);
-    void begin(unsigned long baud, uint32_t config = SERIAL_8N1, unsigned long preDelay = 0, unsigned long postDelay = 0);
+    void begin(unsigned long baud, uint32_t config = SERIAL_8N1);
 
     ModbusRTUMasterError readCoils(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
     ModbusRTUMasterError readDiscreteInputs(uint8_t id, uint16_t startAddress, bool buf[], uint16_t quantity);
@@ -51,7 +51,6 @@ class ModbusRTUMaster {
     ModbusRTUMasterError _writeSingleValue(uint8_t id, uint8_t functionCode, uint16_t address, uint16_t value);
 
     ModbusRTUMasterError _translateCommError(ModbusRTUCommError commError);
-    uint16_t _div8RndUp(uint16_t value);
 
 };
 

@@ -1,15 +1,15 @@
 #include "ModbusRTUMaster.h"
 
-ModbusRTUMaster::ModbusRTUMaster(Stream& serial, int8_t dePin, int8_t rePin, unsigned long timeout) : _rtuComm(serial, dePin, rePin, timeout) {
-
+ModbusRTUMaster::ModbusRTUMaster(Stream& serial, int8_t dePin, int8_t rePin) : _rtuComm(serial, dePin, rePin) {
+  _rtuComm.setTimeout(500);
 }
 
 void ModbusRTUMaster::setTimeout(unsigned long timeout) {
   _rtuComm.setTimeout(timeout);
 }
 
-void ModbusRTUMaster::begin(unsigned long baud, uint32_t config, unsigned long preDelay, unsigned long postDelay) {
-  _rtuComm.begin(baud, config, preDelay, postDelay);
+void ModbusRTUMaster::begin(unsigned long baud, uint32_t config) {
+  _rtuComm.begin(baud, config);
 }
 
 
@@ -47,18 +47,18 @@ ModbusRTUMasterError ModbusRTUMaster::writeMultipleCoils(uint8_t id, uint16_t st
   if (id > 247) return MODBUS_RTU_MASTER_INVALID_ID;
   if (!buf) return MODBUS_RTU_MASTER_INVALID_BUFFER;
   if (quantity == 0 || quantity > 1968) return MODBUS_RTU_MASTER_INVALID_QUANTITY;
-  uint16_t byteCount = _div8RndUp(quantity);
   ModbusADU adu;
+  uint16_t byteCount = div8RndUp(quantity);
   adu.setUnitId(id);
   adu.setFunctionCode(functionCode);
   adu.setDataRegister(0, startAddress);
   adu.setDataRegister(2, quantity);
   adu.data[4] = byteCount;
   for (uint16_t i = 0; i < quantity; i++) {
-    bitWrite(adu.data[5 + (i / 8)], i % 8, buf[i]);
+    bitWrite(adu.data[5 + (i >> 3)], i & 7, buf[i]);
   }
   for (uint16_t i = quantity; i < (byteCount * 8); i++) {
-    bitClear(adu.data[5 + (i / 8)], i % 8);
+    bitClear(adu.data[5 + (i >> 3)], i & 7);
   }
   adu.setDataLen(5 + byteCount);
   _rtuComm.writeAdu(adu);
@@ -136,11 +136,11 @@ ModbusRTUMasterError ModbusRTUMaster::_readValues(uint8_t id, uint8_t functionCo
     return MODBUS_RTU_MASTER_EXCEPTION_RESPONSE;
   }
   if (adu.getFunctionCode() != functionCode) return MODBUS_RTU_MASTER_UNEXPECTED_FUNCTION_CODE;
-  uint16_t byteCount = _div8RndUp(quantity);
+  uint16_t byteCount = div8RndUp(quantity);
   if (adu.getDataLen() != (1 + byteCount)) return MODBUS_RTU_MASTER_UNEXPECTED_LENGTH;
   if (adu.data[0] != byteCount) return MODBUS_RTU_MASTER_UNEXPECTED_BYTE_COUNT;
   for (uint16_t i = 0; i < quantity; i++) {
-    buf[i] = bitRead(adu.data[1 + (i / 8)], i % 8);
+    buf[i] = bitRead(adu.data[1 + (i >> 3)], i & 7);
   }
   return MODBUS_RTU_MASTER_SUCCESS;
 }
@@ -212,9 +212,5 @@ ModbusRTUMasterError ModbusRTUMaster::_translateCommError(ModbusRTUCommError com
     default:
       return MODBUS_RTU_MASTER_UNKNOWN_COMM_ERROR;
   }
-}
-
-uint16_t ModbusRTUMaster::_div8RndUp(uint16_t value) {
-  return (value + 7) >> 3;
 }
 
