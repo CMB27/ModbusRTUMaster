@@ -2,7 +2,7 @@
   ModbusRTUMasterExample
  
   This example demonstrates how to setup and use the ModbusRTUMaster library (https://github.com/CMB27/ModbusRTUMaster).
-  See README.md (https://github.com/CMB27/ModbusRTUMaster/examples/ModbusRTUMasterExample/README.md) for hardware setup details.
+  See README.md (https://github.com/CMB27/ModbusRTUMaster/blob/main/examples/ModbusRTUMasterExample/README.md) for hardware setup details.
   
   Created: 2023-07-22
   By: C. M. Bulliner

@@ -8,7 +8,7 @@ This second board will also need to be setup with the circuit shown below.
 **This program has been tested with the following boards:**  
 
 | Board Name                  | Core                                         | By                      | Ver.   | Works | RX Pin | TX Pin | Modbus Port    |
-| :-------------------------- | :------------------------------------------- | :---------------------- | -----: | :---: | -----: | -----: | :------------- |
+| :-------------------------- | :------------------------------------------- | :---------------------- | :----: | :---: | :----: | :----: | :------------- |
 | Arduino Due                 | Arduino SAM Boards (32-bits ARM Cortex-M3)   | Arduino                 | 1.6.12 | Yes   |     19 |     18 | Serial1        |
 | Arduino Giga                | Arduino Mbed OS GIGA Boards                  | Arduino                 |  4.1.5 | Yes   |      0 |      1 | Serial1        |
 | Arduino Leonardo            | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes   |      0 |      1 | Serial1        |
@@ -27,19 +27,23 @@ This second board will also need to be setup with the circuit shown below.
 | Arduino UNO R4 Minima       | Arduino UNO R4 Boards                        | Arduino                 |  1.2.0 | Yes   |      0 |      1 | Serial1        |
 
 
-> [!NOTE] on Arduino Leonardo:  
+> [!NOTE]  
+> **On Arduino Leonardo:**  
 > Closing a Serial Monitor connected to the board while running this program will cause Modbus communication errors.
 > Resetting the board should cause normal Modbus communications to resume.
 
-> [!NOTE] on Arduino Nano ESP32:  
+> [!NOTE]  
+> **On Arduino Nano ESP32:**  
 > When using the "esp32" core by Espressif Systems, please set pin numbering to "By GPIO number (legacy)".
 > The pin numbering option, "By Arduino pin (default)" does not appear to work correctly with this core.
 
-> [!NOTE] on Arduino Nano RP2040 Connect:  
+> [!NOTE]  
+> **On Arduino Nano RP2040 Connect:**  
 > When using the "Arduino Mbed OS Nano Boards" core by Arduino, this board has trouble receiving Modbus messages.
 > It seems that it is some sort of timing issue.
 
-> [!NOTE] on Arduino Nano Matter:  
+> [!NOTE]  
+> **On Arduino Nano Matter:**  
 > flush() is not properly implemented with Serial on this board.
 > ModbusRTUMaster depends on flush() to know when to set the DE and RE pins LOW after a message is sent.
 
