@@ -7,43 +7,6 @@ This example demonstrates how to setup and use the [ModbusRTUMaster](https://git
 > A second board running ModbusRTUSlaveExample from the [ModbusRTUSlave](https://github.com/CMB27/ModbusRTUSlave) library will be needed.  
 > This second board will also need to be setup with the [circuit](#circuit) shown below.  
 
-**This program has been tested with the following boards:**  
-
-| Board Name                  | Core                                         | By                      | Ver.   | Works    | RX Pin | TX Pin | Modbus Port    |
-| :-------------------------- | :------------------------------------------- | :---------------------- | :----: | :------: | :----: | :----: | :------------- |
-| Arduino Due                 | Arduino SAM Boards (32-bits ARM Cortex-M3)   | Arduino                 | 1.6.12 | Yes      |     19 |     18 | Serial1        |
-| Arduino Giga                | Arduino Mbed OS GIGA Boards                  | Arduino                 |  4.1.5 | Yes      |      0 |      1 | Serial1        |
-| Arduino Leonardo            | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes [^1] |      0 |      1 | Serial1        |
-| Arduino Make Your UNO       | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes      |     10 |     11 | SoftwareSerial |
-| Arduino Mega 2560           | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes      |     19 |     18 | Serial1        |
-| Arduino Nano                | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes      |     10 |     11 | SoftwareSerial |
-| Arduino Nano 33 BLE         | Arduino Mbed OS Nano Boards                  | Arduino                 |  4.1.5 | Yes      |      0 |      1 | Serial1        |
-| Arduino Nano 33 IoT         | Arduino SAMD Boards (32-bits ARM Cortex-M0+) | Arduino                 | 1.8.14 | Yes      |      0 |      1 | Serial1        |
-| Arduino Nano ESP32          | Arduino ESP32 Boards                         | Arduino                 | 2.0.13 | Yes      |      0 |      1 | Serial0        |
-| Arduino Nano ESP32          | esp32                                        | Espressif Systems       |  3.0.4 | Yes [^2] |      0 |      1 | Serial0        |
-| Arduino Nano Every          | Arduino megaAVR Boards                       | Arduino                 |  1.8.8 | Yes      |      0 |      1 | Serial1        |
-| Arduino Nano Matter         | Silicon Labs                                 | Silicon Labs            |  2.1.0 | No [^3]  |      0 |      1 | Serial1        |
-| Arduino Nano RP2040 Connect | Arduino Mbed OS Nano Boards                  | Arduino                 |  4.1.5 | No [^4]  |      0 |      1 | Serial1        |
-| Arduino Nano RP2040 Connect | Raspberry Pi Pico/RP2040                     | Earle F. Philhower, III |  4.0.1 | Yes      |      0 |      1 | Serial1        |
-| Arduino UNO R3 SMD          | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes      |     10 |     11 | SoftwareSerial |
-| Arduino UNO R4 Minima       | Arduino UNO R4 Boards                        | Arduino                 |  1.2.0 | Yes      |      0 |      1 | Serial1        |
-
-
-[^1]: **Arduino Leonardo**  
-Closing a Serial Monitor connected to the board while running this program will cause the program to glitch and not automatically recover.  
-Resetting the board should cause normal program function to resume.
-
-[^2]: **Arduino Nano ESP32**  
-Please set pin numbering to `By GPIO number (legacy)` when using the `esp32` core by Espressif Systems.  
-`By Arduino pin (default)` does not appear to work correctly with this core.
-
-[^3]: **Arduino Nano RP2040 Connect**  
-This board has trouble receiving Modbus messages when using the `Arduino Mbed OS Nano Boards` core by Arduino.  
-It seems that there is some sort of timing issue.
-
-[^4]: **Arduino Nano Matter**  
-`flush()` is not properly implemented with Serial on this board.  
-ModbusRTUMaster depends on `flush()` to know when to set the DE and RE pins LOW after a message is sent.
 
 ## Circuit:  
 ```
