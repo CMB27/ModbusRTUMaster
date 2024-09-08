@@ -13,11 +13,10 @@
 
 #include <ModbusRTUMaster.h>
 
-
-
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
   // The ATmega328P and ATmega168 only have one HardwareSerial port, and on Arduino boards it is usually connected to a USB/UART bridge.
   // So, for these boards, we will use SoftwareSerial with the lbrary, leaving the HardwareSerial port available to send debugging messages.
+  #define SOFTWARE_SERIAL
   #include <SoftwareSerial.h>
   const int8_t rxPin = 10;
   const int8_t txPin = 11;
@@ -45,9 +44,8 @@
   const int8_t dePin = 13;
 #endif
 const int8_t knobPins[2] = {A0, A1};
-const int8_t rePin = -1; // -1 means "No pin"
 
-ModbusRTUMaster modbus(MODBUS_SERIAL, dePin, rePin);
+ModbusRTUMaster modbus(MODBUS_SERIAL, dePin);
 
 const uint8_t numCoils = 2;
 const uint8_t numDiscreteInputs = 2;
@@ -114,11 +112,19 @@ void setup() {
   
   Serial.begin(115200);
 
-  // You can change the baud value if you like.
-  // Just make sure it matches the setting you use in ModbusRTUSlaveExample.
+  // You can change the baud and config values if you like.
+  // Just make sure they match the settings you use in ModbusRTUSlaveExample.
+  // Note, the config value will be ignored when using SoftwareSerial.
+  // SoftwareSerial only supports SERIAL_8N1.
   unsigned long baud = 38400;
-  MODBUS_SERIAL.begin(baud);
-  modbus.begin(baud);
+  #ifndef SOFTWARE_SERIAL
+    uint32_t config = SERIAL_8N1;
+    MODBUS_SERIAL.begin(baud, config);
+    modbus.begin(baud, config);
+  #else
+    MODBUS_SERIAL.begin(baud);
+    modbus.begin(baud);
+  #endif
 }
 
 void loop() {
