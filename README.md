@@ -11,24 +11,20 @@ This is an Arduino library that implements the master/client logic of the Modbus
 
 This library will work with any `Stream` object, like `Serial`. A driver enable pin can be set up, enabling a half-duplex RS-485 transceiver to be used. Only `SERIAL_8N1`, `SERIAL_8E1`, `SERIAL_8O1`, `SERIAL_8N2`, `SERIAL_8E2`, and `SERIAL_8O2` configurations are supported; attempting to use any other configuration will cause the library to default to timings for `SERIAL_8N1`.  
 
-> [!NOTE]  
-> There are some significant changes going from version 1.x.x to version 2.x.x.
-> 
-> In version 2.x.x the library takes `Stream` objects, not `HardwareSerial` objects or the like.
-> `Stream` gives the library access to nearly all the functions it needs in any Serial type object, except for the `begin()` function.
-> It is now necessary to run `begin()` for the Serial object used with the library before running the `begin()` function for the library itself, e.g.:
-> ```C++
-> Serial1.begin(38400);
-> modbus.begin(38400);
-> ```
-> 
-> The read and write functions return an error value instead of a pass/fail `bool`.
-> 
-> The `getTimeoutFlag()`, `clearTimeoutFlag()`, and `clearExceptionResponse()` functions have been removed.
-> 
-> This library is also now dependent on [ModbusADU](https://github.com/CMB27/ModbusADU) and [ModbusRTUComm](https://github.com/CMB27/ModbusRTUComm).
+## Version Note
+There are some significant changes going from version 1.x.x to version 2.x.x of this library.  
+- `begin()` for the Serial object used needs to be run before running `begin()` for the library itself, e.g.:
+  ```C++
+  Serial1.begin(38400);
+  modbus.begin(38400);
+  ```
+- The read and write functions return an error value instead of a pass/fail `bool`.
+- The `getTimeoutFlag()`, `clearTimeoutFlag()`, and `clearExceptionResponse()` functions have been removed.
+- This library is also now dependent on [ModbusADU](https://github.com/CMB27/ModbusADU) and [ModbusRTUComm](https://github.com/CMB27/ModbusRTUComm).
 
-**This library has been tested with the following boards and cores:**  
+
+## Compatibility
+This library has been tested with the following boards and cores:
 
 | Board Name                  | Core                                         | By                      | Ver.   | Works   |
 | :-------------------------- | :------------------------------------------- | :---------------------- | :----: | :-----: |
