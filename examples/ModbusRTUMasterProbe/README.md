@@ -168,6 +168,6 @@ This sketch turns the Arduino into a Modbus master/client device that can be use
 - RX to TX
 - GND to GND
 
-> [WARNING!]  
+> [!WARNING]  
 > Make sure the voltage levels are both the same.
 > If they are different, you will need a logic level converter.
