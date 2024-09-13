@@ -26,24 +26,24 @@ There are some significant changes going from version 1.x.x to version 2.x.x of 
 ## Compatibility
 This library has been tested with the following boards and cores:
 
-| Board Name                  | Core                                         | By                      | Ver.   | Works   |
-| :-------------------------- | :------------------------------------------- | :---------------------- | :----: | :-----: |
-| Arduino Due                 | Arduino SAM Boards (32-bits ARM Cortex-M3)   | Arduino                 | 1.6.12 | Yes     |
-| Arduino Giga                | Arduino Mbed OS GIGA Boards                  | Arduino                 |  4.1.5 | Yes     |
-| Arduino Leonardo            | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes     |
-| Arduino Make Your UNO       | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes     |
-| Arduino Mega 2560           | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes     |
-| Arduino Nano                | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes     |
-| Arduino Nano 33 BLE         | Arduino Mbed OS Nano Boards                  | Arduino                 |  4.1.5 | Yes     |
-| Arduino Nano 33 IoT         | Arduino SAMD Boards (32-bits ARM Cortex-M0+) | Arduino                 | 1.8.14 | Yes     |
-| Arduino Nano ESP32          | Arduino ESP32 Boards                         | Arduino                 | 2.0.13 | Yes     |
-| Arduino Nano ESP32          | esp32                                        | Espressif Systems       |  3.0.4 | Yes     |
-| Arduino Nano Every          | Arduino megaAVR Boards                       | Arduino                 |  1.8.8 | Yes     |
-| Arduino Nano Matter         | Silicon Labs                                 | Silicon Labs            |  2.1.0 | No [^1] |
-| Arduino Nano RP2040 Connect | Arduino Mbed OS Nano Boards                  | Arduino                 |  4.1.5 | No [^2] |
-| Arduino Nano RP2040 Connect | Raspberry Pi Pico/RP2040                     | Earle F. Philhower, III |  4.0.1 | Yes     |
-| Arduino UNO R3 SMD          | Arduino AVR Boards                           | Arduino                 |  1.8.6 | Yes     |
-| Arduino UNO R4 Minima       | Arduino UNO R4 Boards                        | Arduino                 |  1.2.0 | Yes     |
+| Board Name                  | Core                                                                 | Works   |
+| :-------------------------- | :------------------------------------------------------------------- | :-----: |
+| Arduino Due                 | **Arduino SAM Boards (32-bits ARM Cortex-M3)** by Arduino `1.6.12`   | Yes     |
+| Arduino Giga                | **Arduino Mbed OS GIGA Boards** by Arduino `4.1.5`                   | Yes     |
+| Arduino Leonardo            | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
+| Arduino Make Your UNO       | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
+| Arduino Mega 2560           | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
+| Arduino Nano                | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
+| Arduino Nano 33 BLE         | **Arduino Mbed OS Nano Boards** by Arduino `4.1.5`                   | Yes     |
+| Arduino Nano 33 IoT         | **Arduino SAMD Boards (32-bits ARM Cortex-M0+)** by Arduino `1.8.14` | Yes     |
+| Arduino Nano ESP32          | **Arduino ESP32 Boards** by Arduino `2.0.13`                         | Yes     |
+| Arduino Nano ESP32          | **esp32** by Espressif Systems `3.0.4`                               | Yes     |
+| Arduino Nano Every          | **Arduino megaAVR Boards** by Arduino `1.8.8`                        | Yes     |
+| Arduino Nano Matter         | **Silicon Labs** by Silicon Labs `2.1.0`                             | No [^1] |
+| Arduino Nano RP2040 Connect | **Arduino Mbed OS Nano Boards** by Arduino `4.1.5`                   | No [^2] |
+| Arduino Nano RP2040 Connect | **Raspberry Pi Pico/RP2040** by Earle F. Philhower, III `4.0.1`      | Yes     |
+| Arduino UNO R3 SMD          | **Arduino AVR Boards** by Arduino `1.8.6`                            | Yes     |
+| Arduino UNO R4 Minima       | **Arduino UNO R4 Boards** by Arduino `1.2.0`                         | Yes     |
 
 [^1]: **Arduino Nano RP2040 Connect**  
 This board has trouble receiving Modbus messages when using the `Arduino Mbed OS Nano Boards` core by Arduino.  
