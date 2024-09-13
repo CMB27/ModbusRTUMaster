@@ -2,6 +2,8 @@
 
 This sketch turns the Arduino into a Modbus master/client device that can be used to probe a modbus network.
 
+
+
 ## RS-485 Circuit:
 ```
                             VCC                                                                 0.1µF
@@ -59,3 +61,60 @@ This sketch turns the Arduino into a Modbus master/client device that can be use
 - RS485_D-
 - RS485_D+
 - GND
+
+
+
+## RS-232 Circuit:
+```
+                            VCC
+                             ^                            Arduino Board                   RS-232 Transceiver
+                             |                           /                               /
+ +---------------------------o--------------------------/-------------------------------/------+
+ |                                                     /                               /       |
+ |         +------+                   +------+        /                               /        |       5x 1µF Capacitors
+ |      +--|      |-------------------|      |-------+                               /         |      /
+ |      |  |      |                   +------+       |                   +-------v-------+     |     /
+ |      |  |      |                                  |          +---)|---| C1+       VCC |-----o---|(---+
+ |      |  +------+                          SCL [ ] |          |        |               |              |  
+ |      |                                    SDA [ ] |      +---|---)|---| VS+       GND |--------------o
+ |      |                                   AREF [ ] |      |   |        |               |              |
+ |      |                                    GND [ ] |      |   +--------| C1-     T1OUT |--------------|-------> RS232_TX
+ |      | [ ] BOOT                            13 [ ] |      |            |               |              |
+ +------| [ ] IOREF                           12 [ ] |      |   +---)|---| C2+      R1IN |--------------|-------< RS232_RX
+        | [ ] RESET                          ~11 [ ] |      |   |        |               |              |
+        | [ ] 3.3V                           ~10 [ ] |      |   +--------| C2-     R1OUT |----------+   |
+        | [ ] 5V                              ~9 [ ] |      |            |               |          |   |
+        | [ ] GND                              8 [ ] |      o-------|(---| VS-      T1IN |------+   |   |
+ +------| [ ] GND                                    |      |            |               |      |   |   |
+ |      | [ ] VIN                              7 [ ] |      |         x--| T2OUT    T2IN |--x   |   |   |
+ |      |                                     ~6 [ ] |      |            |               |      |   |   |
+ |      | [ ] A0                              ~5 [ ] |      |         x--| R2IN    R2OUT |--x   |   |   |
+ |      | [ ] A1                               4 [ ] |      |            +---------------+      |   |   |
+ |      | [ ] A2                              ~3 [ ] |      |                                   |   |   |
+ |      | [ ] A3                               2 [ ] |      |                                   |   |   |
+ |      | [ ] A4                            TX→1 [ ] |------|-----------------------------------+   |   |
+ |      | [ ] A5                            RX←0 [ ] |------|---------------------------------------+   |
+ |      |                                 __________/       |                                           |
+ |       \_______________________________/                  |                                           |
+ |                                                          |                                           |
+ |                                                          |                                           |
+ +----------------------------------------------------------o-------------------------------------------o------<> GND
+```
+
+**Components:**  
+- Arduino Board
+- RS-232 Transceiver (Must be able to operate at your arduino board's logic level)
+- 5x 1µF Capacitors (At least 20V recommended)
+
+**If using an ATmega328P or ATmega168 based board (Arduino UNO R3 and earlier, Arduino Nano, Arduino Pro Mini, etc.):**
+- Connect R1OUT to pin 10 instead of pin 0
+- Connect T1IN to pin 11 instead of pin 1
+
+**If using an Arduino Mega (either variant) or Arduino Due:**
+- Connect R1OUT to pin 19 instead of pin 0
+- Connect T1IN to pin 18 instead of pin 1
+
+**Connect the following points to the Modbus RS-232 device you want to probe:**
+- RS232_TX to RS232_RX
+- RS232_RX to RS232_TX
+- GND to GND
