@@ -118,3 +118,56 @@ This sketch turns the Arduino into a Modbus master/client device that can be use
 - RS232_TX to RS232_RX
 - RS232_RX to RS232_TX
 - GND to GND
+
+
+
+## UART Circuit:
+```
+                                                Arduino Board
+    +------+                   +------+        /
+ +--|      |-------------------|      |-------+
+ |  |      |                   +------+       |
+ |  |      |                                  |
+ |  +------+                          SCL [ ] |
+ |                                    SDA [ ] |
+ |                                   AREF [ ] |
+ |                                    GND [ ] |------<> GND
+ | [ ] BOOT                            13 [ ] |
+ | [ ] IOREF                           12 [ ] |
+ | [ ] RESET                          ~11 [ ] |
+ | [ ] 3.3V                           ~10 [ ] |
+ | [ ] 5V                              ~9 [ ] |
+ | [ ] GND                              8 [ ] |
+ | [ ] GND                                    |
+ | [ ] VIN                              7 [ ] |
+ |                                     ~6 [ ] |
+ | [ ] A0                              ~5 [ ] |
+ | [ ] A1                               4 [ ] |
+ | [ ] A2                              ~3 [ ] |
+ | [ ] A3                               2 [ ] |
+ | [ ] A4                            TX→1 [ ] |-------> TX
+ | [ ] A5                            RX←0 [ ] |-------< RX
+ |                                 __________/
+  \_______________________________/
+
+```
+
+**Components:**  
+- Arduino Board
+
+**If using an ATmega328P or ATmega168 based board (Arduino UNO R3 and earlier, Arduino Nano, Arduino Pro Mini, etc.):**
+- Use pin 10 as RX instead of pin 0
+- USE pin 11 as TX instead of pin 1
+
+**If using an Arduino Mega (either variant) or Arduino Due:**
+- Use pin 19 as RX instead of pin 0
+- Use pin 18 as TX instead of pin 1
+
+**Connect the following points to the device you want to probe:**
+- TX to RX
+- RX to TX
+- GND to GND
+
+> [WARNING!]  
+> Make sure the voltage levels are both the same.
+> If they are different, you will need a logic level converter.
