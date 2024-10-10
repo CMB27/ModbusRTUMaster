@@ -1,10 +1,5 @@
 # ModbusRTUMaster
 
-> [!WARNING]  
-> ModbusRTUMaster is currently undergoing a redesign.
-> Things may not work, or may not be corretly documented.
-> For a functional version of this library, please use the latest tagged release.
-
 Modbus is an industrial communication protocol. The RTU variant communicates over serial lines such as UART, RS-232, or RS-485. The full details of the Modbus protocol can be found at [modbus.org](https://modbus.org). A good summary can also be found on [Wikipedia](https://en.wikipedia.org/wiki/Modbus).  
 
 This is an Arduino library that implements the master/client logic of the Modbus RTU protocol. This library implements function codes [1 (Read Coils)](#readcoils), [2 (Read Discrete Inputs)](#readdiscreteinputs), [3 (Read Holding Registers)](#readholdingregisters), [4 (Read Input Registers)](#readinputregisters), [5 (Write Single Coil)](#writesinglecoil), [6 (Write Single Holding Register)](#writesingleholdingregister), [15 (Write Multiple Coils)](#writemultipleholdingregisters), and [16 (Write Multiple Holding Registers)](#writemultipleholdingregisters).  
