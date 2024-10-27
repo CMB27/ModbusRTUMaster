@@ -6,7 +6,7 @@
   
   Created: 2023-07-22
   By: C. M. Bulliner
-  Last Modified: 2024-09-07
+  Last Modified: 2024-10-27
   By: C. M. Bulliner
   
 */
@@ -30,6 +30,13 @@
   // On the Arduino Mega and Adruino Due, Serial1 is on pins 18 and 19.
   #define MODBUS_SERIAL Serial1
 #endif
+// You can change the baud, config, and unit id values if you like.
+// Just make sure they match the settings you use in ModbusRTUSlaveExample.
+// Note, the config value will be ignored when using SoftwareSerial.
+// SoftwareSerial only supports SERIAL_8N1.
+#define MODBUS_BUAD 38400
+#define MODBUS_CONFIG SERIAL_8N1
+#define MODBUS_UNIT_ID 1
 
 #if (defined(ARDUINO_NANO_RP2040_CONNECT) && !defined(ARDUINO_ARCH_MBED)) || defined(ARDUINO_NANO_ESP32)
   // These boards operate unsing GPIO numbers that don't correspond to the numbers on the boards.
@@ -81,21 +88,6 @@ const char* errorStrings[] = {
 
 
 
-void printLog(uint8_t unitId, uint8_t functionCode, uint16_t startingAddress, uint16_t quantity, uint8_t error) {
-  transactionCounter++;
-  if (error) errorCounter++;
-  char string[128];
-  sprintf(string, "%ld %ld %02X %02X %04X %04X %s", transactionCounter, errorCounter, unitId, functionCode, startingAddress, quantity, errorStrings[error]);
-  Serial.print(string);
-  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) {
-    sprintf(string, ": %02X", modbus.getExceptionResponse());
-    Serial.print(string);
-  }
-  Serial.println();
-}
-
-
-
 void setup() {
   pinMode(knobPins[0], INPUT);
   pinMode(knobPins[1], INPUT);
@@ -112,18 +104,12 @@ void setup() {
   
   Serial.begin(115200);
 
-  // You can change the baud and config values if you like.
-  // Just make sure they match the settings you use in ModbusRTUSlaveExample.
-  // Note, the config value will be ignored when using SoftwareSerial.
-  // SoftwareSerial only supports SERIAL_8N1.
-  unsigned long baud = 38400;
   #ifndef SOFTWARE_SERIAL
-    uint32_t config = SERIAL_8N1;
-    MODBUS_SERIAL.begin(baud, config);
-    modbus.begin(baud, config);
+    MODBUS_SERIAL.begin(MODBUS_BUAD, MODBUS_CONFIG);
+    modbus.begin(MODBUS_BUAD, MODBUS_CONFIG);
   #else
-    MODBUS_SERIAL.begin(baud);
-    modbus.begin(baud);
+    MODBUS_SERIAL.begin(MODBUS_BUAD);
+    modbus.begin(MODBUS_BUAD);
   #endif
 }
 
@@ -133,24 +119,37 @@ void loop() {
   coils[0] = !digitalRead(buttonPins[0]);
   coils[1] = !digitalRead(buttonPins[1]);
 
-  uint8_t unitId = 1;
-  uint16_t startingAddress[4] = {0, 0, 0, 0};
   uint8_t error;
 
-  error = modbus.writeMultipleHoldingRegisters(unitId, startingAddress[0], holdingRegisters, numHoldingRegisters);
-  printLog(unitId, 16, startingAddress[0], numHoldingRegisters, error);
+  error = modbus.writeMultipleHoldingRegisters(MODBUS_UNIT_ID, 0, holdingRegisters, numHoldingRegisters);
+  printLog(MODBUS_UNIT_ID, 16, 0, numHoldingRegisters, error);
 
-  error = modbus.writeMultipleCoils(unitId, startingAddress[1], coils, numCoils);
-  printLog(unitId, 15, startingAddress[1], numHoldingRegisters, error);
+  error = modbus.writeMultipleCoils(MODBUS_UNIT_ID, 0, coils, numCoils);
+  printLog(MODBUS_UNIT_ID, 15, 0, numHoldingRegisters, error);
 
-  error = modbus.readInputRegisters(unitId, startingAddress[2], inputRegisters, numInputRegisters);
-  printLog(unitId, 4, startingAddress[2], numHoldingRegisters, error);
+  error = modbus.readInputRegisters(MODBUS_UNIT_ID, 0, inputRegisters, numInputRegisters);
+  printLog(MODBUS_UNIT_ID, 4, 0, numHoldingRegisters, error);
 
-  error = modbus.readDiscreteInputs(unitId, startingAddress[3], discreteInputs, numDiscreteInputs);
-  printLog(unitId, 2, startingAddress[3], numHoldingRegisters, error);
+  error = modbus.readDiscreteInputs(MODBUS_UNIT_ID, 0, discreteInputs, numDiscreteInputs);
+  printLog(MODBUS_UNIT_ID, 2, 0, numHoldingRegisters, error);
   
   analogWrite(ledPins[0], inputRegisters[0]);
   analogWrite(ledPins[1], inputRegisters[1]);
   digitalWrite(ledPins[2], discreteInputs[0]);
   digitalWrite(ledPins[3], discreteInputs[1]);
+}
+
+
+
+void printLog(uint8_t unitId, uint8_t functionCode, uint16_t startingAddress, uint16_t quantity, uint8_t error) {
+  transactionCounter++;
+  if (error) errorCounter++;
+  char string[128];
+  sprintf(string, "%ld %ld %02X %02X %04X %04X %s", transactionCounter, errorCounter, unitId, functionCode, startingAddress, quantity, errorStrings[error]);
+  Serial.print(string);
+  if (error == MODBUS_RTU_MASTER_EXCEPTION_RESPONSE) {
+    sprintf(string, ": %02X", modbus.getExceptionResponse());
+    Serial.print(string);
+  }
+  Serial.println();
 }
