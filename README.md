@@ -6,6 +6,8 @@ This is an Arduino library that implements the master/client logic of the Modbus
 
 This library will work with any `Stream` object, like `Serial`. A driver enable pin can be set up, enabling a half-duplex RS-485 transceiver to be used. Only `SERIAL_8N1`, `SERIAL_8E1`, `SERIAL_8O1`, `SERIAL_8N2`, `SERIAL_8E2`, and `SERIAL_8O2` configurations are supported; attempting to use any other configuration will cause the library to default to timings for `SERIAL_8N1`.  
 
+
+
 ## Version Note
 There are some significant changes going from version 1.x.x to version 2.x.x of this library.  
 - `begin()` for the Serial object used needs to be run before running `begin()` for the library itself, e.g.:
@@ -16,6 +18,7 @@ There are some significant changes going from version 1.x.x to version 2.x.x of 
 - The read and write functions return an error value instead of a pass/fail `bool`.
 - The `getTimeoutFlag()`, `clearTimeoutFlag()`, and `clearExceptionResponse()` functions have been removed.
 - This library is also now dependent on [ModbusADU](https://github.com/CMB27/ModbusADU) and [ModbusRTUComm](https://github.com/CMB27/ModbusRTUComm).
+
 
 
 ## Compatibility
@@ -51,31 +54,35 @@ As of this writing (2024-09-07), `flush()` is not properly implemented with Seri
 ModbusRTUMaster depends on `flush()` to know when to set the DE and RE pins LOW after a message is sent.
 
 
+
 ## Examples
 - [ModbusRTUMasterExample](https://github.com/CMB27/ModbusRTUMaster/blob/main/examples/ModbusRTUMasterExample/ModbusRTUMasterExample.ino)
 - [ModbusRTUMasterProbe](https://github.com/CMB27/ModbusRTUMaster/blob/main/examples/ModbusRTUMasterProbe/ModbusRTUMasterProbe.ino)
 
+
+
 ## Methods
 
-### ModbusRTUMaster()
 
-#### Description
+
+<details><summary id="modbusrtumaster-1"><strong>ModbusRTUMaster()</strong></summary>
+  <blockquote>
+
+### Description
 Creates a ModbusRTUMaster object and sets the serial port to use for data transmission.
 Optionally sets a driver enable pin. This pin will go `HIGH` when the library is transmitting. This is primarily intended for use with an RS-485 transceiver, but it can also be a handy diagnostic when connected to an LED.
 
-#### Syntax
-``` C++
-ModbusRTUMaster(serial)
-ModbusRTUMaster(serial, dePin)
-ModbusRTUMaster(serial, dePin, rePin)
-```
+### Syntax
+- `ModbusRTUMaster(serial)`
+- `ModbusRTUMaster(serial, dePin)`
+- `ModbusRTUMaster(serial, dePin, rePin)`
 
-#### Parameters
+### Parameters
 - `serial`: the `Stream` object to use for Modbus communication. Usually something like `Serial1`.
 - `dePin`: the driver enable pin. This pin is set HIGH when transmitting. If this parameter is set to `-1`, this feature will be disabled. The default value is `-1`. Allowed data types are `int8_t` or `char`.
 - `rePin`: works exacly the same way as `dePin`. This option is included for compatibility with RS-485 shields like the [Arduino MKR 485 Shield](https://store.arduino.cc/products/arduino-mkr-485-shield).
 
-#### Example
+### Example
 ``` C++
 # include <ModbusRTUMaster.h>
 
@@ -85,38 +92,40 @@ const int8_t rePin = A5;
 ModbusRTUMaster modbus(Serial1, dePin, rePin);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### setTimeout()
 
-#### Description
+<details><summary id="settimeout"><strong>setTimeout()</strong></summary>
+  <blockquote>
+
+### Description
 Sets the maximum timeout in milliseconds to wait for a response after sending a request. The default is 500 milliseconds.
 
-#### Syntax
-``` C++
-modbus.setTimeout(timeout)
-```
+### Syntax
+`modbus.setTimeout(timeout)`
 
-#### Parameters
+### Parameters
 - `timeout`: the timeout duration in milliseconds. Allowed data types: `unsigned long`.
 
----
+  </blockquote>
+</details>
 
 
-### begin()
 
-#### Description
+<details><summary id="begin"><strong>begin()</strong></summary>
+  <blockquote>
+
+### Description
 Sets the data rate in bits per second (baud) for serial transmission.
 Optionally it also sets the data configuration. Note, there must be 8 data bits for Modbus RTU communication. The default configuration is 8 data bits, no parity, and one stop bit.
 
-#### Syntax
-``` C++
-modbus.begin(baud)
-modbus.begin(baud, config)
-```
+### Syntax
+- `modbus.begin(baud)`
+- `modbus.begin(baud, config)`
 
-#### Parameters
+### Parameters
 - `baud`: the baud rate to use for Modbus communication. Common values are: `1200`, `2400`, `4800`, `9600`, `19200`, `38400`, `57600`, and `115200`. Allowed data types: `unsigned long`.
 - `config`: the serial port configuration to use. Valid values are:  
 `SERIAL_8N1`: no parity (default)  
@@ -128,7 +137,7 @@ modbus.begin(baud, config)
  
 *In the 2.0.0+ version of this library, `begin()` for the serial port used with the modbus object must be run seperately.*
 
-#### Example
+### Example
 ``` C++
 void setup() {
   Serial1.begin(38400, SERIAL_8E1);
@@ -136,26 +145,27 @@ void setup() {
 }
 ```
 
----
+  </blockquote>
+</details>
 
 
-### readCoils()
 
-#### Description
+<details><summary id="readcoils"><strong>readCoils()</strong></summary>
+  <blockquote>
+
+### Description
 reads coil values from a slave/server device.
 
-#### Syntax
-``` C++
-modbus.readCoils(unitId, startAddress, buffer, quantity)
-```
+### Syntax
+`modbus.readCoils(unitId, startAddress, buffer, quantity)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first coil to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read coil values. Allowed data types: array of `bool`.
 - `quantity`: the number of coil values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -172,32 +182,32 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `11`: Unexpected response length
 - `12`: Unexpected byte count in response
 
-#### Example
+### Example
 ``` C++
 bool coils[8];
 uint8_t error = modbus.readCoils(1, 0, coils, 8);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### readDiscreteInputs()
+<details><summary id="readdiscreteinputs"><strong>readDiscreteInputs()</strong></summary>
+  <blockquote>
 
-#### Description
+### Description
 reads discrete input values from a slave/server device.
 
-#### Syntax
-``` C++
-modbus.readDiscreteInputs(unitId, startAddress, buffer, quantity)
-```
+### Syntax
+`modbus.readDiscreteInputs(unitId, startAddress, buffer, quantity)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first discrete input to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read discrete input values. Allowed data types: array of `bool`.
 - `quantity`: the number of discrete input values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -214,32 +224,33 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `11`: Unexpected response length
 - `12`: Unexpected byte count in response
 
-#### Example
+### Example
 ``` C++
 bool discreteInputs[8];
 uint8_t error = modbus.readDiscreteInputs(1, 0, discreteInputs, 8);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### readHoldingRegisters()
 
-#### Description
+<details><summary id="readholdingregisters"><strong>readHoldingRegisters()</strong></summary>
+  <blockquote>
+
+### Description
 reads holding register values from a slave/server device.
 
-#### Syntax
-``` C++
-modbus.readHoldingRegisters(unitId, startAddress, buffer, quantity)
-```
+### Syntax
+`modbus.readHoldingRegisters(unitId, startAddress, buffer, quantity)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first holding register to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read holding register values. Allowed data types: array of `uint16_t`.
 - `quantity`: the number of holding register values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -256,32 +267,33 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `11`: Unexpected response length
 - `12`: Unexpected byte count in response
 
-#### Example
+### Example
 ``` C++
 uint16_t holdingRegisters[8];
 uint8_t error = modbus.readHoldingRegisters(1, 0, holdingRegisters, 8);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### readInputRegisters()
 
-#### Description
+<details><summary id="readinputregisters"><strong>readInputRegisters()</strong></summary>
+  <blockquote>
+
+### Description
 reads input register values from a slave/server device.
 
-#### Syntax
-``` C++
-modbus.readInputRegisters(unitId, startAddress, buffer, quantity)
-```
+### Syntax
+`modbus.readInputRegisters(unitId, startAddress, buffer, quantity)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first input register to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read input register values. Allowed data types: array of `uint16_t`.
 - `quantity`: the number of input register values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -298,31 +310,32 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `11`: Unexpected response length
 - `12`: Unexpected byte count in response
 
-#### Example
+### Example
 ``` C++
 uint16_t inputRegisters[8];
 uint8_t error = modbus.readInputRegisters(1, 0, inputRegisters, 8);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### writeSingleCoil()
 
-#### Description
+<details><summary id="writesinglecoil"><strong>writeSingleCoil()</strong></summary>
+  <blockquote>
+
+### Description
 writes a single coil value to a slave/server device.
 
-#### Syntax
-``` C++
-modbus.writeSingleCoil(unitId, address, value)
-```
+### Syntax
+`modbus.writeSingleCoil(unitId, address, value)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `address`: the address of the coil to write to. Allowed data types: `uint16_t`.
 - `value`: the value to write to the coil. Allowed data types: `bool`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -338,25 +351,26 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `13`: Unexpected data address in response
 - `14`: Unexpected data value in response
 
----
+  </blockquote>
+</details>
 
 
-### writeSingleHoldingRegister()
 
-#### Description
+<details><summary id="writesingleholdingregister"><strong>writeSingleHoldingRegister()</strong></summary>
+  <blockquote>
+
+### Description
 writes a single holding register value to a slave/server device.
 
-#### Syntax
-``` C++
-modbus.writeSingleHoldingRegister(unitId, address, value)
-```
+### Syntax
+`modbus.writeSingleHoldingRegister(unitId, address, value)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `address`: the address of the holding register to write to. Allowed data types: `uint16_t`.
 - `value`: the value to write to the holding register. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -372,26 +386,27 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `13`: Unexpected data address in response
 - `14`: Unexpected data value in response
 
----
+  </blockquote>
+</details>
 
 
-### writeMultipleCoils()
 
-#### Description
+<details><summary id="writemultiplecoils"><strong>writeMultipleCoils()</strong></summary>
+  <blockquote>
+
+### Description
 writes multiple coil values to a slave/server device.
 
-#### Syntax
-``` C++
-uint8_t error = modbus.writeMultipleCoils(unitId, startingAddress, buffer, quantity)
-```
+### Syntax
+`modbus.writeMultipleCoils(unitId, startingAddress, buffer, quantity)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `startAddress`: the address of the first coil to write to. Allowed data types: `uint16_t`.
 - `buffer`: an array of coil values. Allowed data types: array of `bool`.
 - `quantity`: the number of coil values to write. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -409,32 +424,33 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `13`: Unexpected data address in response
 - `15`: Unexpected quantity in response
 
-#### Example
+### Example
 ``` C++
 bool coils[2] = {true, false};
 uint8_t error = modbus.writeMultipleCoils(1, 0, coils, 2);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### writeMultipleHoldingRegisters()
 
-#### Description
+<details><summary id="writemultipleholdingregisters"><strong>writeMultipleHoldingRegisters()</strong></summary>
+  <blockquote>
+
+### Description
 writes multiple holding register values to a slave/server device.
 
-#### Syntax
-``` C++
-modbus.writeMultipleHoldingRegisters(unitId, startingAddress, buffer, quantity)
-```
+### Syntax
+`modbus.writeMultipleHoldingRegisters(unitId, startingAddress, buffer, quantity)`
 
-#### Parameters
+### Parameters
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `startAddress`: the address of the first holding register to write to. Allowed data types: `uint16_t`.
 - `buffer`: an array of holding register values. Allowed data types: array of `uint16_t`.
 - `quantity`: the number of holding register values to write. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
-#### Returns
+### Returns
 Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 
 - `0`: Success
@@ -452,32 +468,33 @@ Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
 - `13`: Unexpected data address in response
 - `15`: Unexpected quantity in response
 
-#### Example
+### Example
 ``` C++
 uint16_t holdingRegisters[2] = {42, 328};
 uint8_t error = modbus.writeMultipleHoldingRegisters(1, 0, holdingRegisters, 2);
 ```
 
----
+  </blockquote>
+</details>
 
 
-### getExceptionResponse()
 
-#### Description
+<details><summary id="getexceptionresponse"><strong>getExceptionResponse()</strong></summary>
+  <blockquote>
+
+### Description
 Gets the last exception response that has occured.
 
 When a valid Modbus request is sent, and the recipient slave/server device cannot process it, it responds with an exception code.
 This response is called an exception resonse, and it can be helpful in diagnosing issues.
 
-#### Syntax
-``` C++
-modbus.getExceptionResponse()
-```
+### Syntax
+`modbus.getExceptionResponse()`
 
-#### Parameters
+### Parameters
 None
 
-#### Returns
+### Returns
 Exception code. Data type: `uint8_t`.
 
 - `0`: None
@@ -487,6 +504,11 @@ Exception code. Data type: `uint8_t`.
 - `4`: Server device failure
 
 _Details on exeption responses can be found in the [Modbus Application Protocol Specification](https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf). More exeption responses exist than are listed here, but these are the most common._
+
+  </blockquote>
+</details>
+
+
 
 ---
 
