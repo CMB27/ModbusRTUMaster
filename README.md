@@ -61,6 +61,26 @@ ModbusRTUMaster depends on `flush()` to know when to set the DE and RE pins LOW 
 
 
 
+## Error Codes
+Several functions return error codes.
+Here is what those error codes mean.
+- `0`: Success
+- `1`: Invalid unit ID
+- `2`: Invalid buffer
+- `3`: Invalid quntity
+- `4`: Response timeout
+- `5`: Frame error
+- `6`: CRC error
+- `7`: Unknown communication error
+- `8`: Unexpected unit ID in response
+- `9`: Exception response
+- `10`: Unexpected function code in response
+- `11`: Unexpected response length
+- `12`: Unexpected byte count in response
+- `13`: Unexpected data address in response
+- `14`: Unexpected data value in response
+- `15`: Unexpected quantity in response
+
 ## Methods
 
 
@@ -166,21 +186,8 @@ reads coil values from a slave/server device.
 - `quantity`: the number of coil values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `2`: Invalid buffer
-- `3`: Invalid quntity
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `12`: Unexpected byte count in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
 ### Example
 ``` C++
@@ -208,21 +215,8 @@ reads discrete input values from a slave/server device.
 - `quantity`: the number of discrete input values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `2`: Invalid buffer
-- `3`: Invalid quntity
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `12`: Unexpected byte count in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
 ### Example
 ``` C++
@@ -251,21 +245,8 @@ reads holding register values from a slave/server device.
 - `quantity`: the number of holding register values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `2`: Invalid buffer
-- `3`: Invalid quntity
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `12`: Unexpected byte count in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
 ### Example
 ``` C++
@@ -294,21 +275,8 @@ reads input register values from a slave/server device.
 - `quantity`: the number of input register values to read. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `2`: Invalid buffer
-- `3`: Invalid quntity
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `12`: Unexpected byte count in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
 ### Example
 ``` C++
@@ -336,20 +304,8 @@ writes a single coil value to a slave/server device.
 - `value`: the value to write to the coil. Allowed data types: `bool`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `13`: Unexpected data address in response
-- `14`: Unexpected data value in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
   </blockquote>
 </details>
@@ -371,20 +327,8 @@ writes a single holding register value to a slave/server device.
 - `value`: the value to write to the holding register. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `13`: Unexpected data address in response
-- `14`: Unexpected data value in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
   </blockquote>
 </details>
@@ -407,22 +351,8 @@ writes multiple coil values to a slave/server device.
 - `quantity`: the number of coil values to write. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `2`: Invalid buffer
-- `3`: Invalid quntity
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `13`: Unexpected data address in response
-- `15`: Unexpected quantity in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
 ### Example
 ``` C++
@@ -451,22 +381,8 @@ writes multiple holding register values to a slave/server device.
 - `quantity`: the number of holding register values to write. This value must not be larger than the size of the array. Allowed data types: `uint16_t`.
 
 ### Returns
-Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.
-
-- `0`: Success
-- `1`: Invalid unit ID
-- `2`: Invalid buffer
-- `3`: Invalid quntity
-- `4`: Response timeout
-- `5`: Frame error
-- `6`: CRC error
-- `7`: Unknown communication error
-- `8`: Unexpected unit ID in response
-- `9`: Exception response
-- `10`: Unexpected function code in response
-- `11`: Unexpected response length
-- `13`: Unexpected data address in response
-- `15`: Unexpected quantity in response
+Error code. Data type: `ModbusRTUMasterError` or `uint8_t`.  
+See [error codes](#error-codes).
 
 ### Example
 ``` C++
