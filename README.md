@@ -432,9 +432,3 @@ _Details on exeption responses can be found in the [Modbus Application Protocol 
 
   </blockquote>
 </details>
-
-
-
----
-
-*Soli Deo Gloria*
