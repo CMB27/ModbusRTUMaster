@@ -136,6 +136,7 @@ Sets the maximum timeout in milliseconds to wait for a response after sending a 
 `modbus.setTimeout(timeout)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `timeout`: the timeout duration in milliseconds. Allowed data types: `unsigned long`.
 
   </blockquote>
@@ -155,6 +156,7 @@ Optionally it also sets the data configuration. Note, there must be 8 data bits 
 - `modbus.begin(baud, config)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `baud`: the baud rate to use for Modbus communication. Common values are: `1200`, `2400`, `4800`, `9600`, `19200`, `38400`, `57600`, and `115200`. Allowed data types: `unsigned long`.
 - `config`: the serial port configuration to use. Valid values are:  
 `SERIAL_8N1`: no parity (default)  
@@ -189,6 +191,7 @@ reads coil values from a slave/server device.
 `modbus.readCoils(unitId, startAddress, buffer, quantity)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first coil to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read coil values. Allowed data types: array of `bool`.
@@ -218,6 +221,7 @@ reads discrete input values from a slave/server device.
 `modbus.readDiscreteInputs(unitId, startAddress, buffer, quantity)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first discrete input to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read discrete input values. Allowed data types: array of `bool`.
@@ -248,6 +252,7 @@ reads holding register values from a slave/server device.
 `modbus.readHoldingRegisters(unitId, startAddress, buffer, quantity)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first holding register to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read holding register values. Allowed data types: array of `uint16_t`.
@@ -278,6 +283,7 @@ reads input register values from a slave/server device.
 `modbus.readInputRegisters(unitId, startAddress, buffer, quantity)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `1` - `246`.
 - `startAddress`: the address of the first input register to read. Allowed data types: `uint16_t`.
 - `buffer`: an array in which to place the read input register values. Allowed data types: array of `uint16_t`.
@@ -308,6 +314,7 @@ writes a single coil value to a slave/server device.
 `modbus.writeSingleCoil(unitId, address, value)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `address`: the address of the coil to write to. Allowed data types: `uint16_t`.
 - `value`: the value to write to the coil. Allowed data types: `bool`.
@@ -331,6 +338,7 @@ writes a single holding register value to a slave/server device.
 `modbus.writeSingleHoldingRegister(unitId, address, value)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `address`: the address of the holding register to write to. Allowed data types: `uint16_t`.
 - `value`: the value to write to the holding register. Allowed data types: `uint16_t`.
@@ -354,6 +362,7 @@ writes multiple coil values to a slave/server device.
 `modbus.writeMultipleCoils(unitId, startingAddress, buffer, quantity)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `startAddress`: the address of the first coil to write to. Allowed data types: `uint16_t`.
 - `buffer`: an array of coil values. Allowed data types: array of `bool`.
@@ -384,6 +393,7 @@ writes multiple holding register values to a slave/server device.
 `modbus.writeMultipleHoldingRegisters(unitId, startingAddress, buffer, quantity)`
 
 ### Parameters
+- `modbus`: a `ModbusRTUMaster` object.
 - `unitId`: the id number of the device to send this request to. Valid values are `0` - `246`. `0` indicates a broadcast message.
 - `startAddress`: the address of the first holding register to write to. Allowed data types: `uint16_t`.
 - `buffer`: an array of holding register values. Allowed data types: array of `uint16_t`.
@@ -417,7 +427,7 @@ This response is called an exception resonse, and it can be helpful in diagnosin
 `modbus.getExceptionResponse()`
 
 ### Parameters
-None
+- `modbus`: a `ModbusRTUMaster` object.
 
 ### Returns
 Exception code. Data type: `uint8_t`.
