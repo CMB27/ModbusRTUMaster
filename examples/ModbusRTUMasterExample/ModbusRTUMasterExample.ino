@@ -25,6 +25,9 @@
 #elif defined(ARDUINO_NANO_ESP32)
   // On the Arduino Nano ESP32, the HardwareSerial port on pins 0 and 1 is Serial0
   #define MODBUS_SERIAL Serial0
+#elif defined(ARDUINO_ARCH_STM32)
+  // On ST Nucleo-64 Boards, the HardwareSerial port on pins 0 and 1 is Serial2.
+  #define MODBUS_SERIAL Serial2
 #else
   // On the majority of Arduino boards, the HardwareSerial port on pins 0 and 1 is Serial1
   // On the Arduino Mega and Adruino Due, Serial1 is on pins 18 and 19.
@@ -98,7 +101,7 @@ void setup() {
   pinMode(ledPins[2], OUTPUT);
   pinMode(ledPins[3], OUTPUT);
 
-  #if defined(ARDUINO_NANO_ESP32)
+  #if defined(ARDUINO_NANO_ESP32) || defined(ARDUINO_NANO_MATTER)
     analogReadResolution(10);
   #endif
   
